@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+owner
+admin
+member
+}
+
+enum SubscriptionPlan {
+free
+pro
+business
+}
+
+enum AuthProvider {
+email
+google
+github
+}
+
+model User {
+id               String   @id @default(uuid())
+
+email            String   @unique
+password         String?
+
+firstName        String?
+lastName         String?
+
+avatar           String?
+
+phone            String?
+
+role             UserRole @default(member)
+
+subscriptionPlan SubscriptionPlan @default(free)
+
+provider         AuthProvider @default(email)
+
+providerId       String?
+
+isVerified       Boolean @default(false)
+
+isActive         Boolean @default(true)
+
+refreshToken     String?
+
+lastSeen         DateTime?
+
+createdAt        DateTime @default(now())
+updatedAt        DateTime @updatedAt
+
+otps             OTP[]
+}
+
+model OTP {
+id         String   @id @default(uuid())
+
+email      String
+
+otp        String
+
+expiresAt  DateTime
+
+userId     String?
+
+user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+createdAt  DateTime @default(now())
+deletedAt  DateTime?
+isDeleted  Boolean  @default(false)
+
+@@index([email])
+}

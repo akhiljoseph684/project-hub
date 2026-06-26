@@ -1,37 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/redux/hooks";
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
-
 export default function ProtectedRoute({
   children,
-}: ProtectedRouteProps) {
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
 
-  const { isAuthenticated } = useAppSelector(
-    (state) => state.auth
+  const { user, isAuthenticated, loading } = useAppSelector(
+    (state) => state.auth,
   );
 
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
+    if (loading) return;
 
     if (!isAuthenticated) {
       router.replace("/login");
     }
-  }, [mounted, isAuthenticated, router]);
 
-  if (!mounted) {
+
+    if (user && !user.isVerified) {
+      router.replace(`/verify-otp?email=${user.email}`);
+      return;
+    }
+  }, [loading, isAuthenticated, router]);
+
+  if (loading) {
     return null;
   }
 

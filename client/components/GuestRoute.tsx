@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/redux/hooks";
 
 export default function GuestRoute({
@@ -10,54 +10,23 @@ export default function GuestRoute({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
 
-  const { isAuthenticated, user } = useAppSelector(
-    (state) => state.auth
-  );
-
-  const [mounted, setMounted] = useState(false);
+  const { isAuthenticated, loading } =
+    useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (loading) return;
 
-  useEffect(() => {
-    if (!mounted) return;
-
-    if (!isAuthenticated) return;
-
-    if (!user) return;
-
-    if (
-      !user.isVerified &&
-      pathname !== "/verify-otp"
-    ) {
-      router.replace(
-        `/verify-otp?email=${user.email}`
-      );
-      return;
+    if (isAuthenticated) {
+      router.replace("/dashboard");
     }
+  }, [loading, isAuthenticated, router]);
 
-    if (
-      user.isVerified &&
-      pathname !== "/home"
-    ) {
-      router.replace("/home");
-    }
-  }, [
-    mounted,
-    isAuthenticated,
-    user,
-    pathname,
-    router,
-  ]);
-
-  if (!mounted) {
+  if (loading) {
     return null;
   }
 
-  if (isAuthenticated && user) {
+  if (isAuthenticated) {
     return null;
   }
 

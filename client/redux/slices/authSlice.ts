@@ -4,18 +4,25 @@ interface User {
   id: string;
   email: string;
   isVerified: boolean;
+  plan: {
+    slug: string;
+    name: string;
+  } | null;
+  planId: string;
 }
 
 interface AuthState {
   user: User | null;
   accessToken: string | null;
   isAuthenticated: boolean;
+  loading: boolean;
 }
 
 const initialState: AuthState = {
   user: null,
   accessToken: null,
   isAuthenticated: false,
+  loading: true,
 };
 
 const authSlice = createSlice({
@@ -39,6 +46,12 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.isAuthenticated = false;
     },
+    updateUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+    },
+    setLoading: (state, action) => {
+      state.loading = action.payload;
+    },
 
     updateAccessToken: (state, action: PayloadAction<string>) => {
       state.accessToken = action.payload;
@@ -46,6 +59,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { setAuth, logout, updateAccessToken } = authSlice.actions;
+export const { setAuth, logout, setLoading, updateAccessToken, updateUser } =
+  authSlice.actions;
 
 export default authSlice.reducer;

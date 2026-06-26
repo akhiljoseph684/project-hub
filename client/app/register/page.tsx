@@ -6,6 +6,8 @@ import { Eye, EyeOff, Mail, ArrowLeft } from "lucide-react";
 import { registerUser } from "../../services/auth.service";
 import GuestRoute from "@/components/GuestRoute";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { setAuth } from "@/redux/slices/authSlice";
 
 interface RegisterFormData {
   email: string;
@@ -20,6 +22,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   const [error, setError] = useState("");
+
+  const dispatch = useDispatch()
 
   const [formData, setFormData] = useState<RegisterFormData>({
     email: "",
@@ -62,15 +66,19 @@ export default function RegisterPage() {
     try {
       setLoading(true);
 
-      const response = await registerUser(formData);
+      const res = await registerUser(formData);
 
-      console.log(response);
+      dispatch(
+        setAuth({
+          user: res.user,
+          accessToken: res.accessToken,
+        }),
+      );
 
       router.push(
         `/verify-otp?email=${formData.email}`
       );
     } catch (error: any) {
-
       if (error?.field && error.field !== "server") {
         setFieldError({
           field: error.field,

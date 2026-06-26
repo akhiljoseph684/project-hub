@@ -92,11 +92,45 @@ export const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const freePlan = await prisma.subscriptionPlan.findUnique({
+      where: {
+        slug: "free",
+      },
+    });
+
+    if (!freePlan) {
+      return res.status(500).json({
+        success: false,
+        message: "Free plan not found",
+      });
+    }
+
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         isVerified: false,
+        planId: freePlan.id,
+      },
+    });
+
+    const accessToken = generateAccessToken(user);
+
+    const refreshToken = generateRefreshToken(user);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        refreshToken,
       },
     });
 
@@ -106,6 +140,16 @@ export const register = async (req, res) => {
 
     return res.status(201).json({
       success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        isVerified: false,
+        plan: {
+          slug: "free",
+          name: "Free",
+        },
+      },
+      accessToken,
       message: "Registration successful. OTP sent to email.",
     });
   } catch (error) {
@@ -141,6 +185,14 @@ export const login = async (req, res) => {
 
     const user = await prisma.user.findUnique({
       where: { email },
+      include: {
+        plan: {
+          select: {
+            slug: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -161,47 +213,36 @@ export const login = async (req, res) => {
       });
     }
 
-    if (user.isVerified) {
-      const accessToken = generateAccessToken(user);
-      const refreshToken = generateRefreshToken(user);
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        refreshToken,
+      },
+    });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
-      await prisma.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          refreshToken,
-        },
-      });
+    if (!user.isVerified) {
+      const otp = await createOTP(user.id, email);
 
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      return res.status(200).json({
-        success: true,
-        accessToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          isVerified: user.isVerified,
-        },
-      });
+      await sendOTPEmail(email, otp);
     }
-
-    const otp = await createOTP(user.id, email);
-
-    await sendOTPEmail(email, otp);
-
     return res.status(200).json({
       success: true,
+      accessToken,
       user: {
         id: user.id,
         email: user.email,
         isVerified: user.isVerified,
+        plan: user.plan,
       },
     });
   } catch (error) {
@@ -211,6 +252,26 @@ export const login = async (req, res) => {
       success: false,
       field: "server",
       message: "Internal server error",
+    });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Logout failed",
     });
   }
 };
@@ -306,6 +367,10 @@ export const verifyOTP = async (req, res) => {
         id: user.id,
         email: user.email,
         isVerified: true,
+        plan: {
+          slug: "free",
+          name: "Free",
+        },
       },
     });
 
@@ -381,46 +446,53 @@ export const resendOTP = async (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (!refreshToken) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-    }
-
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: decoded.id,
-      },
-      select: {
-        id: true,
-        email: true,
-        isVerified: true,
-      },
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    const accessToken = generateAccessToken(user);
+    const accessToken = generateAccessToken(req.user);
 
     return res.status(200).json({
       success: true,
-      user,
+      user: req.user,
       accessToken,
     });
   } catch (error) {
+    console.log(error.message);
     return res.status(401).json({
       success: false,
       message: "Invalid or expired token",
     });
   }
+};
+
+export const add = async (req, res) => {
+  await prisma.subscriptionPlan.createMany({
+    data: [
+      {
+        name: "Free",
+        slug: "free",
+        price: 0,
+        maxProjects: 3,
+        maxTasks: 100,
+        maxMembers: 5,
+      },
+      {
+        name: "Pro",
+        slug: "pro",
+        price: 299,
+        maxProjects: 20,
+        maxTasks: 1000,
+        maxMembers: 25,
+      },
+      {
+        name: "Business",
+        slug: "business",
+        price: 999,
+        maxProjects: null,
+        maxTasks: null,
+        maxMembers: null,
+      },
+    ],
+  });
+  return res.status(201).json({
+    success: true,
+    message: "Successfully",
+  });
 };

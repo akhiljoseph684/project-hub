@@ -8,6 +8,7 @@ import { resendOtp, verifyOtp } from "@/services/auth.service";
 import VerifyOtpRoute from "@/components/VerifyOtpRoute";
 import { useDispatch } from "react-redux";
 import { setAuth } from "@/redux/slices/authSlice";
+import { showInfoToast } from "@/lib/toast";
 
 export default function VerifyOtpPage() {
   const router = useRouter();
@@ -81,9 +82,8 @@ export default function VerifyOtpPage() {
         }),
       );
 
-      router.push("/home");
+      router.push("/dashboard");
     } catch (error: any) {
-      console.log(error);
       setError(error?.message || "Invalid OTP");
     } finally {
       setLoading(false);
@@ -99,9 +99,8 @@ export default function VerifyOtpPage() {
         email,
       });
 
-      console.log(response);
+      showInfoToast(response.message)
     } catch (error: any) {
-      console.log(error);
       setError(error?.message || "Invalid OTP");
     } finally {
       setLoading(false);

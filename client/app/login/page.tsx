@@ -60,8 +60,6 @@ export default function LoginPage() {
 
       const res = await loginUser(formData);
 
-      console.log(res);
-
       dispatch(
         setAuth({
           user: res.user,
@@ -69,12 +67,12 @@ export default function LoginPage() {
         }),
       );
 
-      if (!res.user.isVerified) {
-        router.replace(`/verify-otp?email=${res.user.email}`);
+      if (res.user.isVerified) {
+        router.replace("/dashboard");
         return;
       }
 
-      router.replace("/home");
+      router.replace(`/verify-otp?email=${res.user.email}`);
     } catch (error: any) {
       if (error?.field && error.field !== "server") {
         setFieldError({

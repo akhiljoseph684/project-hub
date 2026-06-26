@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useAppDispatch } from "@/redux/hooks";
-import { setAuth, logout } from "@/redux/slices/authSlice";
+import { setAuth, logout, setLoading } from "@/redux/slices/authSlice";
 import api from "@/lib/axios";
 
 export default function AuthProvider({
@@ -13,32 +13,29 @@ export default function AuthProvider({
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-  console.log("AuthProvider Mounted");
+    const fetchMe = async () => {
+      try {
+        const res = await api.get("/auth/me", {
+          withCredentials: true,
+        });
 
-  const fetchMe = async () => {
-    console.log("Calling /auth/me");
+        console.log(res.data.user);
 
-    try {
-      const res = await api.get("/auth/me", {
-        withCredentials: true,
-      });
+        dispatch(
+          setAuth({
+            user: res.data.user,
+            accessToken: res.data.accessToken,
+          }),
+        );
+      } catch {
+        dispatch(logout());
+      } finally {
+        dispatch(setLoading(false));
+      }
+    };
 
-      console.log("Auth Success");
-
-      dispatch(
-        setAuth({
-          user: res.data.user,
-          accessToken: res.data.accessToken,
-        })
-      );
-    } catch {
-      console.log("Auth Failed");
-      dispatch(logout());
-    }
-  };
-
-  fetchMe();
-}, [dispatch]);
+    fetchMe();
+  }, [dispatch]);
 
   return <>{children}</>;
 }

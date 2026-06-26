@@ -40,6 +40,22 @@ export const loginUser = async (data: LoginPayload) => {
   }
 };
 
+
+export const logoutUser = async () => {
+  try {
+    const res = await api.post("/auth/logout");
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Logout failed",
+      }
+    );
+  }
+};
+
 export interface VerifyOtpPayload {
   email: string;
   otp: string;

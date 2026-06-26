@@ -8,74 +8,100 @@ datasource db {
 }
 
 enum UserRole {
-owner
-admin
-member
-}
-
-enum SubscriptionPlan {
-free
-pro
-business
+  owner
+  admin
+  member
 }
 
 enum AuthProvider {
-email
-google
-github
+  email
+  google
+  github
 }
 
 model User {
-id               String   @id @default(uuid())
+  id String @id @default(uuid())
 
-email            String   @unique
-password         String?
+  email    String  @unique
+  password String?
 
-firstName        String?
-lastName         String?
+  firstName String?
+  lastName  String?
 
-avatar           String?
+  avatar String?
 
-phone            String?
+  phone String?
 
-role             UserRole @default(member)
+  role UserRole @default(member)
 
-subscriptionPlan SubscriptionPlan @default(free)
+  planId String?
 
-provider         AuthProvider @default(email)
+  plan SubscriptionPlan? @relation(fields: [planId], references: [id])
 
-providerId       String?
+  provider AuthProvider @default(email)
 
-isVerified       Boolean @default(false)
+  providerId String?
 
-isActive         Boolean @default(true)
+  isVerified Boolean @default(false)
 
-refreshToken     String?
+  isActive Boolean @default(true)
 
-lastSeen         DateTime?
+  refreshToken String?
 
-createdAt        DateTime @default(now())
-updatedAt        DateTime @updatedAt
+  lastSeen DateTime?
 
-otps             OTP[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  otps          OTP[]
+  subscriptions Subscription[]
 }
 
 model OTP {
-id         String   @id @default(uuid())
+  id String @id @default(uuid())
 
-email      String
+  email String
 
-otp        String
+  otp String
 
-expiresAt  DateTime
+  expiresAt DateTime
 
-userId     String?
+  userId String?
 
-user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-createdAt  DateTime @default(now())
-deletedAt  DateTime?
-isDeleted  Boolean  @default(false)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+  isDeleted Boolean   @default(false)
 
-@@index([email])
+  @@index([email])
+}
+
+model SubscriptionPlan {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  price       Float
+  maxProjects Int?
+  maxTasks    Int?
+  maxMembers  Int?
+  isActive    Boolean @default(true)
+
+  users         User[]
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id String @id @default(cuid())
+
+  userId String
+  planId String
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User             @relation(fields: [userId], references: [id])
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
 }

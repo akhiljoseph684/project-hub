@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import cors from "cors"
 import authRoutes from "./src/routes/auth.route.js"
 import cookieParser from "cookie-parser";
+import subscriptionRoutes from "./src/routes/subscription.route.js"
 
 
 const prisma = new PrismaClient();
@@ -35,6 +36,7 @@ app.get("/", async (req, res) => {
 });
 
 app.use("/api/auth", authRoutes)
+app.use("/api/subscription", subscriptionRoutes);
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");

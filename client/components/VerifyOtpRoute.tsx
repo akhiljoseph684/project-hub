@@ -11,24 +11,36 @@ export default function VerifyOtpRoute({
 }) {
   const router = useRouter();
 
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user, loading } =
+    useAppSelector((state) => state.auth);
 
-  console.log(user)
   useEffect(() => {
+    if (loading) return;
+
     if (!isAuthenticated) {
       router.replace("/login");
       return;
     }
 
     if (user?.isVerified) {
-      router.replace("/home");
-      return;
+      router.replace("/dashboard");
     }
-  }, [isAuthenticated, user, router]);
+  }, [
+    loading,
+    isAuthenticated,
+    user,
+    router,
+  ]);
+
+  if (loading) {
+    return null;
+  }
 
   if (!isAuthenticated) {
     return null;
   }
+
+  
 
   if (user?.isVerified) {
     return null;

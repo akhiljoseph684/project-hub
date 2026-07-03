@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { socket } from "@/lib/socket";
 import { Eye, EyeOff, Mail, ArrowLeft } from "lucide-react";
 import { loginUser } from "../../services/auth.service";
 import { useDispatch } from "react-redux";
@@ -59,6 +60,8 @@ export default function LoginPage() {
       setLoading(true);
 
       const res = await loginUser(formData);
+
+      socket.connect();
 
       dispatch(
         setAuth({

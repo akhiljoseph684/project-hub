@@ -7,6 +7,7 @@ import AuthProvider from "@/providers/AuthProvider";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
+import SocketProvider from "@/providers/socket-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -30,8 +31,10 @@ export default function RootLayout({
         <ThemeProvider>
           <ReduxProvider>
             <AuthProvider>
-              {children}
-              <Toaster position="top-right" richColors closeButton />
+              <SocketProvider>
+                {children}
+                <Toaster position="top-right" richColors closeButton />
+              </SocketProvider>
             </AuthProvider>
           </ReduxProvider>
         </ThemeProvider>

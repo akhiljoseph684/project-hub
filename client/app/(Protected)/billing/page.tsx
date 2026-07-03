@@ -47,8 +47,8 @@ export default function BillingPage() {
       const res = await getPlans();
 
       setPlans(res.plans);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      showErrorToast(error.message)
     } finally {
       setLoading(false);
     }
@@ -58,8 +58,8 @@ export default function BillingPage() {
       const res = await getPlansByUser();
 
       setUserPlans(res.plans);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      showErrorToast(error.message)
     } finally {
       setLoading(false);
     }

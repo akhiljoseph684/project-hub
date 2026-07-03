@@ -31,6 +31,8 @@ import { logout } from "@/redux/slices/authSlice";
 import { showErrorToast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/redux/hooks";
+import { socket } from "@/lib/socket";
+import UserAvatar from "./user-avatar";
 
 const navItems = [
   {
@@ -87,6 +89,7 @@ export default function DashboardSidebar({
       await logoutUser();
 
       dispatch(logout());
+      socket.disconnect();
 
       router.push("/login");
     } catch (error) {
@@ -156,16 +159,12 @@ export default function DashboardSidebar({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex w-full items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted">
-              <Avatar>
-                <AvatarImage
-                  src={user?.avatar ?? ""}
-                  alt={user?.firstName ?? ""}
-                />
-
-                <AvatarFallback>
-                  {`${user?.firstName?.[0] ?? ""}`}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar
+                avatar={user?.avatar}
+                firstName={user?.firstName}
+                lastName={user?.lastName}
+                isOnline={true}
+              />
 
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium">

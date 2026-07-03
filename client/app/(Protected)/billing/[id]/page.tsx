@@ -52,8 +52,8 @@ export default function PlanCheckoutPage() {
       if (response.success) {
         setPlan(response.plan);
       }
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      showErrorToast(error.message)
     } finally {
       setLoading(false);
     }

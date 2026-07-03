@@ -25,7 +25,7 @@ import { updateProfile } from "../../services/user.service";
 import { useDispatch } from "react-redux";
 
 import { updateUser } from "@/redux/slices/authSlice";
-import { showSuccessToast } from "@/lib/toast";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
 
 import ProfileAvatarUpload from "./profile-avatar-upload";
 import { useState } from "react";
@@ -74,8 +74,8 @@ export default function ProfileForm({ onOpenChange }: ProfileFormProps) {
       showSuccessToast("Welcome to Project Hub 👋");
 
       onOpenChange(false);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      showErrorToast(error.message)
     } finally {
       setLoading(false);
     }

@@ -10,6 +10,7 @@ import DashboardSidebar from "./sidebar";
 import { useState } from "react";
 import Link from "next/link";
 import { useAppSelector } from "@/redux/hooks";
+import UserAvatar from "./user-avatar";
 
 export default function DashboardNavbar() {
   const [open, setOpen] = useState(false);
@@ -69,16 +70,12 @@ export default function DashboardNavbar() {
           </Button>
           <Link href="/profile">
             <div className="flex items-center gap-3 border-l pl-3 md:hidden">
-              <Avatar>
-                <AvatarImage
-                  src={user?.avatar ?? ""}
-                  alt={user?.firstName ?? ""}
-                />
-
-                <AvatarFallback>
-                  {`${user?.firstName?.[0] ?? ""}`}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar
+                avatar={user?.avatar}
+                firstName={user?.firstName}
+                lastName={user?.lastName}
+                isOnline={false}
+              />
             </div>
           </Link>
         </div>

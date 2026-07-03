@@ -1,7 +1,32 @@
-import React from 'react'
+"use client";
 
-export default function page() {
+import { useEffect, useState } from "react";
+import { socket } from "@/lib/socket";
+
+export default function Page() {
+  const [connected, setConnected] = useState(socket.connected);
+
+  useEffect(() => {
+    const onConnect = () => {
+      setConnected(true);
+    };
+
+    const onDisconnect = () => {
+      setConnected(false);
+    };
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+    };
+  }, []);
+
   return (
-    <div>Dashboard</div>
-  )
+    <div>
+      <p>{connected ? "🟢 Online" : "🔴 Offline"}</p>
+    </div>
+  );
 }

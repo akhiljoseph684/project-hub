@@ -41,6 +41,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { showErrorToast } from "@/lib/toast";
+import UserAvatar from "../user-avatar";
+import { useAppSelector } from "@/redux/hooks";
 
 interface Props {
   form: UseFormReturn<CreateProjectInput>;
@@ -52,6 +54,7 @@ interface User {
   lastName: string;
   email: string;
   avatar?: string | null;
+  isOnline: boolean;
 }
 
 export default function ProjectMembers({ form }: Props) {
@@ -64,6 +67,8 @@ export default function ProjectMembers({ form }: Props) {
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   const debouncedSearch = useDebounce(search, 500);
+
+  const onlineUsers = useAppSelector((state) => state.socket.onlineUsers);
 
   const members = form.watch("members");
 
@@ -78,6 +83,7 @@ export default function ProjectMembers({ form }: Props) {
         setLoadingUsers(true);
 
         const res = await searchUsers(debouncedSearch);
+
 
         const availableUsers = res.users.filter(
           (user: User) => !members.some((member) => member.userId === user.id),
@@ -179,30 +185,26 @@ export default function ProjectMembers({ form }: Props) {
                       <div
                         key={user.id}
                         onClick={() => addMember(user)}
-                        className="flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between flex cursor-pointer items-center justify-between border-b px-4 py-3 transition last:border-b-0 hover:bg-muted/50"
+                        className="flex items-center justify-between gap-3 border-b px-4 py-3 transition hover:bg-muted/50 last:border-b-0"
                       >
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage
-                              src={user?.avatar ?? ""}
-                              alt={user?.firstName ?? ""}
-                            />
+                        <div className="flex min-w-0 items-center gap-3">
+                          <UserAvatar
+                            avatar={user?.avatar}
+                            firstName={user?.firstName}
+                            lastName={user?.lastName}
+                            isOnline={!!onlineUsers[user.id]}
+                          />
 
-                            <AvatarFallback>
-                              {`${user?.firstName?.[0] ?? ""}`}
-                            </AvatarFallback>
-                          </Avatar>
+                          <div className="min-w-0">
+                            <p className="truncate font-medium">{fullName}</p>
 
-                          <div className="text-left">
-                            <p className="font-medium">{fullName}</p>
-
-                            <p className="text-sm text-muted-foreground">
+                            <p className="truncate text-sm text-muted-foreground">
                               {user.email}
                             </p>
                           </div>
                         </div>
 
-                        <Button size="sm" type="button">
+                        <Button size="sm" type="button" className="shrink-0">
                           <UserPlus className="mr-2 h-4 w-4" />
                           Add
                         </Button>
@@ -252,18 +254,12 @@ export default function ProjectMembers({ form }: Props) {
                     <TableRow key={member.userId}>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={user.avatar ?? undefined} />
-
-                            <AvatarFallback>
-                              {fullName
-                                .split(" ")
-                                .filter(Boolean)
-                                .map((word) => word[0])
-                                .join("")
-                                .slice(0, 2)}
-                            </AvatarFallback>
-                          </Avatar>
+                          <UserAvatar
+                            avatar={user?.avatar}
+                            firstName={user?.firstName}
+                            lastName={user?.lastName}
+                            isOnline={!!onlineUsers[user.id]}
+                          />
 
                           <span className="font-medium">{fullName}</span>
                         </div>

@@ -20,9 +20,13 @@ import ProjectTimeline from "./project-timeline";
 import ProjectFeatures from "./project-features";
 import ProjectMembers from "./project-members";
 import ProjectSummary from "./project-summary";
+import { createProject } from "@/services/project.service";
+import { useRouter } from "next/navigation";
 
 export default function CreateProjectForm() {
   const [loading, setLoading] = useState(false);
+
+  const router = useRouter()
 
   const form = useForm<CreateProjectInput>({
     resolver: zodResolver(createProjectSchema),
@@ -56,7 +60,10 @@ export default function CreateProjectForm() {
     try {
       setLoading(true);
 
-      console.log(values);
+      let res = await createProject(values);
+
+      router.push("/projects")
+
     } catch (error) {
       console.error(error);
     } finally {
@@ -83,7 +90,7 @@ export default function CreateProjectForm() {
 
           <ProjectFeatures form={form} />
 
-          <ProjectMembers form={form} />
+          {/* <ProjectMembers form={form} /> */}
         </div>
 
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">

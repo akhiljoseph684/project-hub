@@ -13,6 +13,7 @@ import userRoutes from "./src/routes/user.route.js"
 
 import http from "http";
 import { initSocket } from "./socket.js";
+import { errorHandler } from "./src/middleware/error.middleware.js";
 
 
 const prisma = new PrismaClient();
@@ -48,6 +49,8 @@ app.use("/api/auth", authRoutes)
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/user", userRoutes);
+
+app.use(errorHandler);
 
 const server = http.createServer(app);
 

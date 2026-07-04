@@ -53,8 +53,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  otps          OTP[]
-  subscriptions Subscription[]
+  otps               OTP[]
+  subscriptions      Subscription[]
+  ownedProjects      Project[]       @relation("OwnedProjects")
+  projectMemberships ProjectMember[]
 }
 
 model OTP {
@@ -104,4 +106,98 @@ model Subscription {
 
   user User             @relation(fields: [userId], references: [id])
   plan SubscriptionPlan @relation(fields: [planId], references: [id])
+}
+
+enum ProjectType {
+  SCRUM
+  KANBAN
+}
+
+enum ProjectVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+model Project {
+  id String @id @default(cuid())
+
+  ownerId String
+
+  owner User @relation("OwnedProjects", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  name String
+
+  key String
+
+  slug String @unique
+
+  description String?
+
+  icon String?
+
+  color String
+
+  type ProjectType
+
+  visibility ProjectVisibility @default(PRIVATE)
+
+  startDate DateTime?
+
+  endDate DateTime?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  roles ProjectRole[]
+
+  members ProjectMember[]
+
+  @@unique([ownerId, key])
+}
+
+model ProjectRole {
+  id String @id @default(cuid())
+
+  projectId String
+
+  name String
+
+  description String?
+
+  permissions Json
+
+  color String?
+
+  isSystem Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  members ProjectMember[]
+
+  @@unique([projectId, name])
+}
+
+model ProjectMember {
+  id String @id @default(cuid())
+
+  projectId String
+
+  userId String
+
+  roleId String
+
+  joinedAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role ProjectRole @relation(fields: [roleId], references: [id])
+
+  @@unique([projectId, userId])
 }

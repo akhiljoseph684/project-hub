@@ -230,13 +230,13 @@ export default function ProjectMembers({ form }: Props) {
         />
         {members.length > 0 ? (
           <div className="overflow-hidden rounded-xl border">
-            <Table className="min-w-[700px]">
+            <Table className="min-w-0">
               <TableHeader>
                 <TableRow>
                   <TableHead>Member</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
-                  <TableHead className="w-[80px] text-right">Action</TableHead>
+                  <TableHead className="w-20 text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
 

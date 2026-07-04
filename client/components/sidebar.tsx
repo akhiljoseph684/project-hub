@@ -42,27 +42,27 @@ const navItems = [
   },
   {
     label: "Projects",
-    href: "/dashboard/projects",
+    href: "/projects",
     icon: FolderKanban,
   },
   {
     label: "Tasks",
-    href: "/dashboard/tasks",
+    href: "/tasks",
     icon: ListTodo,
   },
   {
     label: "Teams",
-    href: "/dashboard/teams",
+    href: "/teams",
     icon: Users,
   },
   {
     label: "Sprints",
-    href: "/dashboard/sprints",
+    href: "/sprints",
     icon: Rocket,
   },
   {
     label: "Analytics",
-    href: "/dashboard/analytics",
+    href: "/analytics",
     icon: BarChart3,
   },
   {

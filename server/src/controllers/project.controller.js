@@ -22,7 +22,7 @@ export const searchUsers = async (req, res) => {
 
     const results = await multi.exec();
 
-    console.log(results)
+    console.log(results);
     const usersWithStatus = users.map((user, index) => ({
       ...user,
       isOnline: results[index] === 1,
@@ -30,7 +30,7 @@ export const searchUsers = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      users: usersWithStatus
+      users: usersWithStatus,
     });
   } catch (error) {
     console.error("Search Users Error:", error);
@@ -39,5 +39,25 @@ export const searchUsers = async (req, res) => {
       success: false,
       message: "Internal server error.",
     });
+  }
+};
+
+import * as projectService from "../services/project.service.js";
+
+export const createProject = async (req, res, next) => {
+  try {
+    const project = await projectService.createProject({
+      ownerId: req.user.id,
+      body: req.body,
+      file: req.file,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Project created successfully.",
+      project,
+    });
+  } catch (error) {
+    next(error);
   }
 };

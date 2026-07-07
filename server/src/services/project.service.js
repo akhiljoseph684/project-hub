@@ -43,7 +43,6 @@ export const searchUsersService = async (search) => {
   return users;
 };
 
-
 export const createProject = async ({ ownerId, body, file }) => {
   const {
     name,
@@ -184,4 +183,113 @@ export const createProject = async ({ ownerId, body, file }) => {
 
     return project;
   });
+};
+
+export const getProjects = async ({
+  userId,
+  page = 1,
+  limit = 12,
+  search = "",
+}) => {
+  page = Number(page);
+  limit = Number(limit);
+
+  const skip = (page - 1) * limit;
+
+  const where = {
+    userId,
+
+    project: {
+      name: {
+        contains: search,
+        mode: "insensitive",
+      },
+    },
+  };
+
+  const [projects, totalProjects] = await prisma.$transaction([
+    prisma.projectMember.findMany({
+      where,
+
+      skip,
+
+      take: limit,
+
+      orderBy: {
+        project: {
+          createdAt: "desc",
+        },
+      },
+
+      include: {
+        role: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
+          },
+        },
+
+        project: {
+          include: {
+            owner: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+              },
+            },
+
+            _count: {
+              select: {
+                members: true,
+              },
+            },
+          },
+        },
+      },
+    }),
+
+    prisma.projectMember.count({
+      where,
+    }),
+  ]);
+
+  return {
+    projects: projects.map((member) => ({
+      id: member.project.id,
+      name: member.project.name,
+      key: member.project.key,
+      slug: member.project.slug,
+      description: member.project.description,
+      icon: member.project.icon,
+      color: member.project.color,
+      type: member.project.type,
+      visibility: member.project.visibility,
+      startDate: member.project.startDate,
+      endDate: member.project.endDate,
+      createdAt: member.project.createdAt,
+
+      owner: member.project.owner,
+
+      role: member.role,
+
+      membersCount: member.project._count.members,
+    })),
+
+    pagination: {
+      page,
+
+      limit,
+
+      totalProjects,
+
+      totalPages: Math.ceil(totalProjects / limit),
+
+      hasNextPage: page * limit < totalProjects,
+
+      hasPreviousPage: page > 1,
+    },
+  };
 };

@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 export default function CreateProjectForm() {
   const [loading, setLoading] = useState(false);
 
-  const router = useRouter()
+  const router = useRouter();
 
   const form = useForm<CreateProjectInput>({
     resolver: zodResolver(createProjectSchema),
@@ -60,10 +60,37 @@ export default function CreateProjectForm() {
     try {
       setLoading(true);
 
-      let res = await createProject(values);
+      const formData = new FormData();
 
-      router.push("/projects")
+      formData.append("name", values.name);
+      formData.append("key", values.key);
+      formData.append("description", values.description ?? "");
+      formData.append("type", values.type);
+      formData.append("visibility", values.visibility);
+      formData.append("color", values.color);
 
+      if (values.icon) {
+        formData.append("icon", values.icon);
+      }
+
+      formData.append("startDate", values.startDate.toISOString());
+
+      if (values.endDate) {
+        formData.append("endDate", values.endDate.toISOString());
+      }
+
+      values.features.forEach((feature) => {
+        formData.append("features", feature);
+      });
+
+      values.members.forEach((member) => {
+        formData.append("members", JSON.stringify(member));
+      });
+
+      console.log(formData)
+      await createProject(formData);
+
+      router.push("/projects");
     } catch (error) {
       console.error(error);
     } finally {

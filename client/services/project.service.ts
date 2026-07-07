@@ -15,7 +15,7 @@ export const searchUsers = async (search: string) => {
   }
 };
 
-export const createProject = async (data: any) => {
+export const createProject = async (data: FormData) => {
   try {
     const response = await api.post("/projects", data);
 
@@ -30,9 +30,19 @@ export const createProject = async (data: any) => {
   }
 };
 
-export const getProjects = async () => {
+export const getProjects = async (
+  page: number,
+  limit: number,
+  search: string = ""
+) => {
   try {
-    const response = await api.get("/projects");
+    const response = await api.get("/projects", {
+      params: {
+        page,
+        limit,
+        search
+      }
+    });
 
     return response.data;
   } catch (error: any) {

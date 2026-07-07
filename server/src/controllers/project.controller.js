@@ -1,5 +1,5 @@
 import redisClient from "../../config/redis.js";
-import { searchUsersService } from "../services/project.service.js";
+import * as projectService from "../services/project.service.js";
 
 export const searchUsers = async (req, res) => {
   try {
@@ -12,7 +12,7 @@ export const searchUsers = async (req, res) => {
       });
     }
 
-    const users = await searchUsersService(search);
+    const users = await projectService.searchUsersService(search);
 
     const multi = redisClient.multi();
 
@@ -42,10 +42,9 @@ export const searchUsers = async (req, res) => {
   }
 };
 
-import * as projectService from "../services/project.service.js";
-
 export const createProject = async (req, res, next) => {
   try {
+    console.log(req.file)
     const project = await projectService.createProject({
       ownerId: req.user.id,
       body: req.body,
@@ -56,6 +55,24 @@ export const createProject = async (req, res, next) => {
       success: true,
       message: "Project created successfully.",
       project,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProjects = async (req, res, next) => {
+  try {
+    const data = await projectService.getProjects({
+      userId: req.user.id,
+      page: req.query.page || 1,
+      limit: req.query.limit || 12,
+      search: req.query.search || "",
+    });
+
+    return res.status(200).json({
+      success: true,
+      ...data,
     });
   } catch (error) {
     next(error);

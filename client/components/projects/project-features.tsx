@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/form";
 
 import { Checkbox } from "@/components/ui/checkbox";
+import { useEffect } from "react";
 
 interface Props {
   form: UseFormReturn<CreateProjectInput>;
@@ -97,6 +98,17 @@ const FEATURES = [
 export default function ProjectFeatures({ form }: Props) {
   const projectType = form.watch("type");
   const selectedFeatures = form.watch("features");
+  useEffect(() => {
+    if (projectType === "KANBAN") {
+      const features = form
+        .getValues("features")
+        .filter((feature) => feature !== "SPRINTS" && feature !== "BACKLOG");
+
+      form.setValue("features", features, {
+        shouldValidate: true,
+      });
+    }
+  }, [projectType, form]);
 
   return (
     <Card>
@@ -123,8 +135,11 @@ export default function ProjectFeatures({ form }: Props) {
                     (projectType === "KANBAN" &&
                       (feature.id === "SPRINTS" || feature.id === "BACKLOG"));
 
-                  const checked = !((projectType === "KANBAN" &&
-                      (feature.id === "SPRINTS" || feature.id === "BACKLOG"))) &&selectedFeatures.includes(feature.id as any);
+                  const checked =
+                    !(
+                      projectType === "KANBAN" &&
+                      (feature.id === "SPRINTS" || feature.id === "BACKLOG")
+                    ) && selectedFeatures.includes(feature.id as any);
 
                   return (
                     <div

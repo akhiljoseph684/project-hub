@@ -171,3 +171,8 @@ body {
   background: hsl(var(--primary));
   background-clip: content-box;
 }
+
+
+.navbar-scroll::-webkit-scrollbar {
+  display: none;
+}

@@ -55,6 +55,12 @@ export const createProject = async ({ ownerId, body, file }) => {
     endDate,
   } = body;
 
+  const features = body.features
+    ? Array.isArray(body.features)
+      ? body.features
+      : [body.features]
+    : [];
+
   const existingProject = await prisma.project.findFirst({
     where: {
       ownerId,
@@ -100,6 +106,7 @@ export const createProject = async ({ ownerId, body, file }) => {
         color,
         type,
         visibility,
+        features,
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
       },

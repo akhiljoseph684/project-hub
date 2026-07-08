@@ -118,6 +118,33 @@ enum ProjectVisibility {
   PUBLIC
 }
 
+enum ProjectFeature {
+  BOARD
+  TASKS
+  MEMBERS
+  ACTIVITY
+  SETTINGS
+
+  SPRINTS
+  BACKLOG
+
+  MILESTONES
+  CALENDAR
+  FILES
+  TIME_TRACKING
+
+  REPORTS
+  WIKI
+  CHAT
+  NOTIFICATIONS
+  AUTOMATION
+  GOALS
+  CUSTOM_FIELDS
+  ISSUES
+  RELEASES
+  EPICS
+}
+
 model Project {
   id String @id @default(cuid())
 
@@ -140,6 +167,8 @@ model Project {
   type ProjectType
 
   visibility ProjectVisibility @default(PRIVATE)
+
+  features Json @default("[\"BOARD\",\"TASKS\"]")
 
   startDate DateTime?
 

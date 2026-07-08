@@ -8,88 +8,154 @@ import {
   ChevronRight,
   Flag,
   Folder,
+  FolderKanban,
   KanbanSquare,
   LayoutDashboard,
   ListTodo,
+  Loader2,
   Settings,
   Users,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ReactNode, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 interface Props {
   children: ReactNode;
 }
 
-const project = {
-  id: "1",
-  name: "Project Hub",
-  key: "PH",
-  description:
-    "A modern project management platform inspired by Jira and Linear.",
-  type: "SCRUM",
-};
-
 const features = [
   {
     name: "Overview",
-    href: `/dashboard/projects/${project.id}`,
+    feature: null,
     icon: LayoutDashboard,
   },
   {
     name: "Board",
-    href: `/dashboard/projects/${project.id}/board`,
+    feature: "BOARD",
     icon: KanbanSquare,
   },
   {
     name: "Backlog",
-    href: `/dashboard/projects/${project.id}/backlog`,
+    feature: "BACKLOG",
     icon: ListTodo,
-    scrumOnly: true,
   },
   {
     name: "Sprint",
-    href: `/dashboard/projects/${project.id}/sprints`,
+    feature: "SPRINTS",
     icon: Flag,
-    scrumOnly: true,
   },
   {
     name: "Tasks",
-    href: `/dashboard/projects/${project.id}/tasks`,
+    feature: "TASKS",
     icon: CheckSquare,
   },
   {
     name: "Members",
-    href: `/dashboard/projects/${project.id}/members`,
+    feature: null,
     icon: Users,
   },
   {
     name: "Files",
-    href: `/dashboard/projects/${project.id}/files`,
+    feature: "FILES",
     icon: Folder,
   },
   {
     name: "Calendar",
-    href: `/dashboard/projects/${project.id}/calendar`,
+    feature: "CALENDAR",
     icon: Calendar,
   },
   {
     name: "Activity",
-    href: `/dashboard/projects/${project.id}/activity`,
+    feature: null,
     icon: Activity,
   },
   {
     name: "Settings",
-    href: `/dashboard/projects/${project.id}/settings`,
+    feature: null,
     icon: Settings,
   },
-];
+] as const;
 import { usePathname } from "next/navigation";
+import { getProjectBySlug } from "@/services/project.service";
+import { showErrorToast } from "@/lib/toast";
+
+export interface ProjectRole {
+  id: string;
+  name: string;
+  permissions: string[];
+}
+
+export interface CurrentUser {
+  role: ProjectRole;
+}
+
+export interface ProjectOwner {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatar: string | null;
+}
+
+export type ProjectType = "SCRUM" | "KANBAN";
+
+export type ProjectVisibility = "PRIVATE" | "PUBLIC";
+
+export type ProjectFeature =
+  | "BOARD"
+  | "TASKS"
+  | "SPRINTS"
+  | "BACKLOG"
+  | "MILESTONES"
+  | "CALENDAR"
+  | "TIME_TRACKING"
+  | "FILES";
+
+export interface Project {
+  id: string;
+  name: string;
+  key: string;
+  slug: string;
+  description: string;
+  color: string;
+  icon: string | null;
+
+  type: ProjectType;
+  visibility: ProjectVisibility;
+
+  startDate: string;
+  endDate: string | null;
+  createdAt: string;
+
+  features: ProjectFeature[];
+
+  membersCount: number;
+
+  owner: ProjectOwner;
+  currentUser: CurrentUser;
+}
 
 export default function ProjectLayout({ children }: Props) {
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(false);
   const { slug } = useParams();
   const navRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  async function fetchProjects() {
+    try {
+      setLoading(true);
+      let res = await getProjectBySlug(slug as string);
+      setProject(res.project);
+    } catch (error: any) {
+      showErrorToast(error.message || "Something Went Wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const scroll = (direction: "left" | "right") => {
     if (!navRef.current) return;
@@ -100,28 +166,56 @@ export default function ProjectLayout({ children }: Props) {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="rounded-xl border bg-card p-6">
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-600 text-xl font-bold text-white">
-                {project.key}
+              <div
+                className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-primary/10"
+                style={{
+                  backgroundColor: project?.color
+                    ? `${project.color}20`
+                    : undefined,
+                }}
+              >
+                {project?.icon ? (
+                  <img
+                    src={project.icon}
+                    alt={project.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <FolderKanban
+                    className="h-7 w-7"
+                    style={{
+                      color: project?.color,
+                    }}
+                  />
+                )}
               </div>
 
               <div>
-                <h1 className="text-2xl font-bold">{project.name}</h1>
+                <h1 className="text-2xl font-bold">{project?.name}</h1>
 
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {project.description}
+                  {project?.description}
                 </p>
               </div>
             </div>
           </div>
 
           <div className="rounded-md border px-3 py-2 text-sm font-medium">
-            {project.type}
+            {project?.type === "KANBAN" ? "Kanban" : "Scrum"}
           </div>
         </div>
       </div>
@@ -147,7 +241,11 @@ export default function ProjectLayout({ children }: Props) {
         >
           <nav className="flex min-w-max items-center">
             {features
-              .filter((item) => !item.scrumOnly || project.type === "SCRUM")
+              .filter(
+                (item) =>
+                  item.feature === null ||
+                  project?.features?.includes(item.feature),
+              )
               .map((item) => {
                 const Icon = item.icon;
 
@@ -160,29 +258,9 @@ export default function ProjectLayout({ children }: Props) {
                   <Link
                     key={item.name}
                     href={href}
-                    className="
-                    relative
-                    flex
-                    shrink-0
-                    items-center
-                    gap-2
-                    whitespace-nowrap
-                    border-b-2
-                    border-transparent
-                    px-5
-                    py-4
-                    text-sm
-                    font-medium
-                    text-muted-foreground
-                    transition-all
-                    duration-200
-                    hover:border-primary
-                    hover:bg-muted/50
-                    hover:text-foreground
-                  "
+                    className="relative flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 border-transparent px-5 py-4 text-sm font-medium text-muted-foreground transition-all duration-200 hover:border-primary hover:bg-muted/50 hover:text-foreground"
                   >
                     <Icon className="h-4 w-4" />
-
                     <span>{item.name}</span>
                   </Link>
                 );

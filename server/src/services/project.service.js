@@ -300,3 +300,74 @@ export const getProjects = async ({
     },
   };
 };
+
+export const getProjectBySlug = async ({ slug, userId }) => {
+  const projectMember = await prisma.projectMember.findFirst({
+    where: {
+      userId,
+      project: {
+        slug,
+      },
+    },
+
+    include: {
+      role: {
+        select: {
+          id: true,
+          name: true,
+          permissions: true,
+          color: true,
+        },
+      },
+
+      project: {
+        include: {
+          owner: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatar: true,
+            },
+          },
+
+          _count: {
+            select: {
+              members: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!projectMember) {
+    throw new Error("Project not found.");
+  }
+
+  const project = projectMember.project;
+
+  return {
+    id: project.id,
+    name: project.name,
+    key: project.key,
+    slug: project.slug,
+    description: project.description,
+    icon: project.icon,
+    color: project.color,
+    type: project.type,
+    visibility: project.visibility,
+    features: project.features,
+    startDate: project.startDate,
+    endDate: project.endDate,
+    createdAt: project.createdAt,
+
+    owner: project.owner,
+
+    membersCount: project._count.members,
+
+    currentUser: {
+      role: projectMember.role,
+    },
+  };
+};

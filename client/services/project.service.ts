@@ -55,9 +55,9 @@ export const getProjects = async (
   }
 };
 
-export const getProjectById = async (id: string) => {
+export const getProjectBySlug = async (slug: string | null) => {
   try {
-    const response = await api.get(`/projects/${id}`);
+    const response = await api.get(`/projects/${slug}`);
 
     return response.data;
   } catch (error: any) {

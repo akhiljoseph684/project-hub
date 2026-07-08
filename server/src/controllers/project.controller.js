@@ -78,3 +78,21 @@ export const getProjects = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getProjectBySlug = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    const project = await projectService.getProjectBySlug({
+      slug,
+      userId: req.user.id,
+    });
+
+    res.status(200).json({
+      success: true,
+      project,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

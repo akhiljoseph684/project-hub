@@ -200,6 +200,10 @@ model ProjectRole {
 
   isSystem Boolean @default(false)
 
+  isDeleted Boolean @default(false)
+
+  deletedAt DateTime?
+
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt

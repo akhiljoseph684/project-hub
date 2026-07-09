@@ -79,6 +79,8 @@ const features = [
 import { usePathname } from "next/navigation";
 import { getProjectBySlug } from "@/services/project.service";
 import { showErrorToast } from "@/lib/toast";
+import { setCurrentProject } from "@/redux/slices/projectSlice";
+import { useDispatch } from "react-redux";
 
 export interface ProjectRole {
   id: string;
@@ -140,6 +142,7 @@ export default function ProjectLayout({ children }: Props) {
   const [loading, setLoading] = useState(false);
   const { slug } = useParams();
   const navRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch()
 
   useEffect(() => {
     fetchProjects();
@@ -149,6 +152,7 @@ export default function ProjectLayout({ children }: Props) {
     try {
       setLoading(true);
       let res = await getProjectBySlug(slug as string);
+      dispatch(setCurrentProject(res.project));
       setProject(res.project);
     } catch (error: any) {
       showErrorToast(error.message || "Something Went Wrong");

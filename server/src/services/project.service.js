@@ -115,6 +115,7 @@ export const createProject = async ({ ownerId, body, file }) => {
     const roles = [
       {
         name: "Owner",
+        color: "#2563EB",
         description: "Full access to the project.",
         isSystem: true,
         permissions: {
@@ -135,6 +136,7 @@ export const createProject = async ({ ownerId, body, file }) => {
       {
         name: "Admin",
         description: "Manage project and members.",
+        color: "#7C3AED",
         isSystem: true,
         permissions: {
           "project.view": true,
@@ -148,6 +150,7 @@ export const createProject = async ({ ownerId, body, file }) => {
       {
         name: "Member",
         description: "Collaborate on project tasks.",
+        color: "#22C55E",
         isSystem: true,
         permissions: {
           "project.view": true,
@@ -158,6 +161,7 @@ export const createProject = async ({ ownerId, body, file }) => {
       {
         name: "Viewer",
         description: "Read-only access.",
+        color: "#F97316",
         isSystem: true,
         permissions: {
           "project.view": true,
@@ -369,5 +373,134 @@ export const getProjectBySlug = async ({ slug, userId }) => {
     currentUser: {
       role: projectMember.role,
     },
+  };
+};
+
+export const getProjectRoles = async ({ projectId }) => {
+  const project = await prisma.project.findUnique({
+    where: {
+      id: projectId,
+    },
+  });
+
+  if (!project) {
+    throw new Error("Project not found.");
+  }
+
+  const roles = await prisma.projectRole.findMany({
+    where: {
+      projectId,
+      isDeleted: false,
+    },
+
+    orderBy: {
+      createdAt: "asc",
+    },
+
+    include: {
+      _count: {
+        select: {
+          members: true,
+        },
+      },
+    },
+  });
+
+  return roles;
+};
+
+export const createProjectRole = async ({ projectId, body }) => {
+  const { name, description, color, permissions } = body;
+
+  const existingRole = await prisma.projectRole.findFirst({
+    where: {
+      projectId,
+      name,
+      isDeleted: false,
+    },
+  });
+
+  if (existingRole) {
+    throw new Error("Role already exists.");
+  }
+
+  const role = await prisma.projectRole.create({
+    data: {
+      projectId,
+      name,
+      description,
+      color,
+      permissions,
+    },
+  });
+
+  return role;
+};
+
+export const updateProjectRole = async ({ roleId, body }) => {
+  const role = await prisma.projectRole.findUnique({
+    where: {
+      id: roleId,
+    },
+  });
+
+  if (!role) {
+    throw new Error("Role not found.");
+  }
+
+  const updatedRole = await prisma.projectRole.update({
+    where: {
+      id: roleId,
+      isDeleted: false,
+    },
+
+    data: {
+      name: body.name,
+      description: body.description,
+      color: body.color,
+      permissions: body.permissions,
+      isSystem: role.isSystem,
+    },
+  });
+
+  return updatedRole;
+};
+
+export const deleteProjectRole = async ({ roleId }) => {
+  const role = await prisma.projectRole.findUnique({
+    where: {
+      id: roleId,
+      isDeleted: false,
+    },
+
+    include: {
+      members: true,
+    },
+  });
+
+  if (!role) {
+    throw new Error("Role not found.");
+  }
+
+  if (role.isSystem) {
+    throw new Error("System roles cannot be deleted.");
+  }
+
+  if (role.members.length > 0) {
+    throw new Error("Cannot delete a role assigned to members.");
+  }
+
+  await prisma.projectRole.update({
+    where: {
+      id: roleId,
+    },
+    data: {
+      isDeleted: true,
+      deletedAt: new Date(),
+    },
+  });
+
+  return {
+    message: "Role deleted successfully.",
   };
 };

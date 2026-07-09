@@ -44,7 +44,7 @@ export const searchUsers = async (req, res) => {
 
 export const createProject = async (req, res, next) => {
   try {
-    console.log(req.file)
+    console.log(req.file);
     const project = await projectService.createProject({
       ownerId: req.user.id,
       body: req.body,
@@ -94,5 +94,68 @@ export const getProjectBySlug = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const getProjectRoles = async (req, res, next) => {
+  try {
+    const roles = await projectService.getProjectRoles({
+      projectId: req.params.projectId,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Roles fetched successfully.",
+      roles,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createRole = async (req, res, next) => {
+  try {
+    const role = await projectService.createProjectRole({
+      projectId: req.params.projectId,
+      body: req.body,
+    });
+
+    res.status(201).json({
+      success: true,
+      role,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateRole = async (req, res, next) => {
+  try {
+    const role = await projectService.updateProjectRole({
+      roleId: req.params.roleId,
+      body: req.body,
+    });
+
+    res.json({
+      success: true,
+      role,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteRole = async (req, res, next) => {
+  try {
+    const result = await projectService.deleteProjectRole({
+      roleId: req.params.roleId,
+    });
+
+    res.json({
+      success: true,
+      ...result,
+    });
+  } catch (err) {
+    next(err);
   }
 };

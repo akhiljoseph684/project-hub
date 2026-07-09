@@ -33,15 +33,15 @@ export const createProject = async (data: FormData) => {
 export const getProjects = async (
   page: number,
   limit: number,
-  search: string = ""
+  search: string = "",
 ) => {
   try {
     const response = await api.get("/projects", {
       params: {
         page,
         limit,
-        search
-      }
+        search,
+      },
     });
 
     return response.data;
@@ -70,15 +70,9 @@ export const getProjectBySlug = async (slug: string | null) => {
   }
 };
 
-export const updateProject = async (
-  id: string,
-  data: any
-) => {
+export const updateProject = async (id: string, data: any) => {
   try {
-    const response = await api.patch(
-      `/projects/${id}`,
-      data
-    );
+    const response = await api.patch(`/projects/${id}`, data);
 
     return response.data;
   } catch (error: any) {
@@ -93,9 +87,7 @@ export const updateProject = async (
 
 export const deleteProject = async (id: string) => {
   try {
-    const response = await api.delete(
-      `/projects/${id}`
-    );
+    const response = await api.delete(`/projects/${id}`);
 
     return response.data;
   } catch (error: any) {
@@ -113,17 +105,93 @@ export const inviteMembers = async (
   members: {
     userId: string;
     role: "ADMIN" | "MEMBER" | "VIEWER";
-  }[]
+  }[],
 ) => {
   try {
-    const response = await api.post(
-      `/projects/${projectId}/members`,
-      {
-        members,
-      }
-    );
+    const response = await api.post(`/projects/${projectId}/members`, {
+      members,
+    });
 
     return response.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const getProjectRoles = async (projectId: string) => {
+  try {
+    const res = await api.get(`/projects/${projectId}/roles`);
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const createProjectRole = async (
+  projectId: string | null,
+  payload: {
+    name: string;
+    description?: string;
+    color?: string;
+    permissions: Record<string, boolean>;
+  },
+) => {
+  try {
+    const res = await api.post(`/projects/${projectId}/roles`, payload);
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const updateProjectRole = async (
+  roleId: string,
+  payload: {
+    name: string;
+    description?: string;
+    color?: string;
+    permissions: Record<string, boolean>;
+  },
+) => {
+  try {
+    const res = await api.patch(
+      `/projects/roles/${roleId}`,
+      payload,
+    );
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const deleteProjectRole = async (roleId: string) => {
+  try {
+    const res = await api.delete(`/projects/roles/${roleId}`);
+
+    return res.data;
   } catch (error: any) {
     throw (
       error.response?.data || {

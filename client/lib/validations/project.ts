@@ -112,3 +112,9 @@ export const createProjectSchema = z
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 
 export type ProjectMemberInput = z.infer<typeof projectMemberSchema>;
+
+export const updateProjectSchema = createProjectSchema.extend({
+  slug: z.string(),
+});
+
+export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;

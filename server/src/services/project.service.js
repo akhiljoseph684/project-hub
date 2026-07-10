@@ -412,6 +412,10 @@ export const getProjectRoles = async ({ projectId }) => {
 export const createProjectRole = async ({ projectId, body }) => {
   const { name, description, color, permissions } = body;
 
+  if(!name || !color){
+    throw new Error("Fill The these fields");
+  }
+
   const existingRole = await prisma.projectRole.findFirst({
     where: {
       projectId,

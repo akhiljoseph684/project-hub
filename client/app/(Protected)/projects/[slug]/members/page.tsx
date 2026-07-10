@@ -1,7 +1,9 @@
-import React from 'react'
+"use client";
 
-export default function page() {
+import MembersPage from "@/components/projects/members/members-page";
+
+export default function ProjectMembersPage() {
   return (
-    <div>Page</div>
-  )
+    <MembersPage />
+  );
 }

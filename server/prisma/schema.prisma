@@ -53,10 +53,12 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  otps               OTP[]
-  subscriptions      Subscription[]
-  ownedProjects      Project[]       @relation("OwnedProjects")
-  projectMemberships ProjectMember[]
+  otps                   OTP[]
+  subscriptions          Subscription[]
+  ownedProjects          Project[]           @relation("OwnedProjects")
+  projectMemberships     ProjectMember[]
+  projectInvitations     ProjectInvitation[] @relation("ProjectInvitedUser")
+  sentProjectInvitations ProjectInvitation[] @relation("ProjectInvitedBy")
 }
 
 model OTP {
@@ -182,6 +184,8 @@ model Project {
 
   members ProjectMember[]
 
+  projectInvitations ProjectInvitation[]
+
   @@unique([ownerId, key])
 }
 
@@ -212,6 +216,8 @@ model ProjectRole {
 
   members ProjectMember[]
 
+  invitations ProjectInvitation[]
+
   @@unique([projectId, name])
 }
 
@@ -233,4 +239,36 @@ model ProjectMember {
   role ProjectRole @relation(fields: [roleId], references: [id])
 
   @@unique([projectId, userId])
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model ProjectInvitation {
+  id String @id @default(cuid())
+
+  projectId   String
+  userId      String
+  roleId      String
+  invitedById String
+
+  status InvitationStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  user User @relation("ProjectInvitedUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  invitedBy User @relation("ProjectInvitedBy", fields: [invitedById], references: [id])
+
+  role ProjectRole @relation(fields: [roleId], references: [id])
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([status])
 }

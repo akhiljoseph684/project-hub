@@ -171,10 +171,7 @@ export const updateProjectRole = async (
   },
 ) => {
   try {
-    const res = await api.patch(
-      `/projects/roles/${roleId}`,
-      payload,
-    );
+    const res = await api.patch(`/projects/roles/${roleId}`, payload);
 
     return res.data;
   } catch (error: any) {
@@ -192,6 +189,159 @@ export const deleteProjectRole = async (roleId: string) => {
     const res = await api.delete(`/projects/roles/${roleId}`);
 
     return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const getProjectMembers = async (projectId: string) => {
+  try {
+    const res = await api.get(`/projects/${projectId}/members`);
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+interface UpdateProjectMemberRolePayload {
+  roleId: string;
+}
+
+export const updateProjectMemberRole = async (
+  projectId: string,
+  memberId: string,
+  data: UpdateProjectMemberRolePayload,
+) => {
+  try {
+    const res = await api.patch(
+      `/projects/${projectId}/members/${memberId}`,
+      data,
+    );
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const removeProjectMember = async (
+  projectId: string,
+  memberId: string,
+) => {
+  try {
+    const res = await api.delete(`/projects/${projectId}/members/${memberId}`);
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+interface CreateProjectInvitationPayload {
+  userId: string;
+  roleId: string;
+}
+
+export const createProjectInvitation = async (
+  projectId: string,
+  data: CreateProjectInvitationPayload,
+) => {
+  try {
+    const res = await api.post(`/projects/${projectId}/invitations`, data);
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const getProjectInvitations = async (
+  projectId: string,
+  status?: "PENDING" | "ACCEPTED" | "DECLINED",
+) => {
+  try {
+    const res = await api.get(`/projects/${projectId}/invitations`, {
+      params: {
+        status,
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const acceptProjectInvitation = async (invitationId: string) => {
+  try {
+    const res = await api.patch(`/projects/invitations/${invitationId}/accept`);
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const declineProjectInvitation = async (invitationId: string) => {
+  try {
+    const res = await api.patch(`/projects/invitations/${invitationId}/decline`);
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const deleteProjectInvitation = async (
+  invitationId: string,
+) => {
+  try {
+    const res = await api.delete(
+    `/projects/invitations/${invitationId}`,
+  );
+
+  return res.data;
   } catch (error: any) {
     throw (
       error.response?.data || {

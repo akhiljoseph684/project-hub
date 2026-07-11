@@ -13,27 +13,19 @@ import {
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import RoleSelect from "./role-select";
-import UserSearch from "./user-search";
+import UserSearch, { SearchUser } from "./user-search";
 
 interface InviteMemberDialogProps {
   open: boolean;
+
   loading?: boolean;
 
   onClose: () => void;
 
   onInvite: (userId: string, roleId: string) => Promise<void>;
-}
-
-export interface SearchUser {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  avatar?: string;
 }
 
 export default function InviteMemberDialog({
@@ -63,47 +55,40 @@ export default function InviteMemberDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
+        if (!value) onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Invite Member</DialogTitle>
 
           <DialogDescription>
-            Search for a user and assign a project role.
+            Search for a user, assign a project role and send an invitation to
+            join this project.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Search */}
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Search User</label>
 
-            <div className="relative">
-              <Search className="absolute left-3 top-1.5 h-4 w-4 text-muted-foreground" />
-
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-                placeholder="Search name or email..."
-              />
-            </div>
-
             <UserSearch
               search={search}
               selectedUser={selectedUser}
-              onSelect={setSelectedUser}
               setSearch={setSearch}
+              onSelect={setSelectedUser}
             />
           </div>
 
-          {/* Selected */}
 
           {selectedUser && (
             <div className="rounded-xl border p-4">
               <div className="flex items-center gap-3">
-                <Avatar>
+                <Avatar className="h-11 w-11">
                   <AvatarImage src={selectedUser.avatar} />
 
                   <AvatarFallback>
@@ -113,9 +98,9 @@ export default function InviteMemberDialog({
                 </Avatar>
 
                 <div>
-                  <h4 className="font-medium">
+                  <h3 className="font-medium">
                     {selectedUser.firstName} {selectedUser.lastName}
-                  </h4>
+                  </h3>
 
                   <p className="text-sm text-muted-foreground">
                     {selectedUser.email}
@@ -125,7 +110,6 @@ export default function InviteMemberDialog({
             </div>
           )}
 
-          {/* Role */}
 
           <RoleSelect value={roleId} onChange={setRoleId} />
         </div>
@@ -142,12 +126,12 @@ export default function InviteMemberDialog({
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Inviting...
+                Sending...
               </>
             ) : (
               <>
                 <UserPlus className="mr-2 h-4 w-4" />
-                Invite Member
+                Send Invitation
               </>
             )}
           </Button>

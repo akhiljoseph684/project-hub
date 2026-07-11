@@ -412,7 +412,7 @@ export const getProjectRoles = async ({ projectId }) => {
 export const createProjectRole = async ({ projectId, body }) => {
   const { name, description, color, permissions } = body;
 
-  if(!name || !color){
+  if (!name || !color) {
     throw new Error("Fill The these fields");
   }
 
@@ -507,4 +507,405 @@ export const deleteProjectRole = async ({ roleId }) => {
   return {
     message: "Role deleted successfully.",
   };
+};
+
+export const getProjectMembers = async (projectId) => {
+  const project = await prisma.project.findUnique({
+    where: {
+      id: projectId,
+    },
+  });
+
+  if (!project) {
+    throw new Error("Project not found.");
+  }
+
+  const members = await prisma.projectMember.findMany({
+    where: {
+      projectId,
+    },
+
+    orderBy: {
+      joinedAt: "asc",
+    },
+
+    include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          avatar: true,
+          lastSeen: true,
+        },
+      },
+
+      role: {
+        select: {
+          id: true,
+          name: true,
+          color: true,
+          isSystem: true,
+        },
+      },
+    },
+  });
+
+  return members;
+};
+
+export const updateProjectMemberRole = async ({
+  projectId,
+  memberId,
+  roleId,
+}) => {
+  const member = await prisma.projectMember.findFirst({
+    where: {
+      id: memberId,
+      projectId,
+    },
+  });
+
+  if (!member) {
+    throw new Error("Project member not found.");
+  }
+
+  const role = await prisma.projectRole.findFirst({
+    where: {
+      id: roleId,
+      projectId,
+      isDeleted: false,
+    },
+  });
+
+  if (!role) {
+    throw new Error("Project role not found.");
+  }
+
+  if (member.roleId === role.id) {
+    throw new Error("Member already has this role.");
+  }
+
+  const updatedMember = await prisma.projectMember.update({
+    where: {
+      id: memberId,
+    },
+
+    data: {
+      roleId,
+    },
+
+    include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          avatar: true,
+          lastSeen: true,
+        },
+      },
+
+      role: {
+        select: {
+          id: true,
+          name: true,
+          color: true,
+          isSystem: true,
+        },
+      },
+    },
+  });
+
+  return updatedMember;
+};
+
+export const removeProjectMember = async ({ projectId, memberId }) => {
+  const member = await prisma.projectMember.findFirst({
+    where: {
+      id: memberId,
+      projectId,
+    },
+
+    include: {
+      project: {
+        select: {
+          ownerId: true,
+        },
+      },
+    },
+  });
+
+  if (!member) {
+    throw new Error("Project member not found.");
+  }
+
+  if (member.userId === member.project.ownerId) {
+    throw new Error("Project owner cannot be removed.");
+  }
+
+  await prisma.projectMember.delete({
+    where: {
+      id: memberId,
+    },
+  });
+
+  return {
+    id: memberId,
+  };
+};
+
+export const createProjectInvitation = async ({
+  projectId,
+  invitedById,
+  userId,
+  roleId,
+}) => {
+  const project = await prisma.project.findUnique({
+    where: {
+      id: projectId,
+    },
+  });
+
+  if (!project) {
+    throw new Error("Project not found.");
+  }
+
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId,
+      isActive: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  const role = await prisma.projectRole.findFirst({
+    where: {
+      id: roleId,
+      projectId,
+      isDeleted: false,
+    },
+  });
+
+  if (!role) {
+    throw new Error("Project role not found.");
+  }
+
+  const member = await prisma.projectMember.findFirst({
+    where: {
+      projectId,
+      userId,
+    },
+  });
+
+  if (member) {
+    throw new Error("User is already a project member.");
+  }
+
+  const invitation = await prisma.projectInvitation.findFirst({
+    where: {
+      projectId,
+      userId,
+      status: "PENDING",
+    },
+  });
+
+  if (invitation) {
+    throw new Error("User already has a pending invitation.");
+  }
+
+  return await prisma.projectInvitation.create({
+    data: {
+      projectId,
+      invitedById,
+      userId,
+      roleId,
+    },
+
+    include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          avatar: true,
+        },
+      },
+
+      role: {
+        select: {
+          id: true,
+          name: true,
+          color: true,
+        },
+      },
+    },
+  });
+};
+
+export const getProjectInvitations = async ({ projectId, status }) => {
+  const project = await prisma.project.findUnique({
+    where: {
+      id: projectId,
+    },
+  });
+
+  if (!project) {
+    throw new Error("Project not found.");
+  }
+
+  const where = {
+    projectId,
+  };
+
+  if (status) {
+    where.status = status;
+  }
+
+  const invitations = await prisma.projectInvitation.findMany({
+    where,
+
+    orderBy: {
+      createdAt: "desc",
+    },
+
+    include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          avatar: true,
+        },
+      },
+
+      invitedBy: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+        },
+      },
+
+      role: {
+        select: {
+          id: true,
+          name: true,
+          color: true,
+        },
+      },
+    },
+  });
+
+  return invitations;
+};
+
+export const acceptProjectInvitation = async ({ invitationId, userId }) => {
+  const invitation = await prisma.projectInvitation.findUnique({
+    where: {
+      id: invitationId,
+    },
+  });
+
+  if (!invitation) {
+    throw new Error("Invitation not found.");
+  }
+
+  if (invitation.userId !== userId) {
+    throw new Error("You are not authorized to accept this invitation.");
+  }
+
+  if (invitation.status !== "PENDING") {
+    throw new Error("Invitation has already been processed.");
+  }
+
+  const member = await prisma.projectMember.findFirst({
+    where: {
+      projectId: invitation.projectId,
+      userId,
+    },
+  });
+
+  if (member) {
+    throw new Error("You are already a member of this project.");
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    const projectMember = await tx.projectMember.create({
+      data: {
+        projectId: invitation.projectId,
+        userId,
+        roleId: invitation.roleId,
+      },
+    });
+
+    await tx.projectInvitation.update({
+      where: {
+        id: invitationId,
+      },
+      data: {
+        status: "ACCEPTED",
+      },
+    });
+
+    return projectMember;
+  });
+};
+
+export const declineProjectInvitation = async ({ invitationId, userId }) => {
+  const invitation = await prisma.projectInvitation.findUnique({
+    where: {
+      id: invitationId,
+    },
+  });
+
+  if (!invitation) {
+    throw new Error("Invitation not found.");
+  }
+
+  if (invitation.userId !== userId) {
+    throw new Error("You are not authorized to decline this invitation.");
+  }
+
+  if (invitation.status !== "PENDING") {
+    throw new Error("Invitation has already been processed.");
+  }
+
+  return await prisma.projectInvitation.update({
+    where: {
+      id: invitationId,
+    },
+    data: {
+      status: "DECLINED",
+    },
+  });
+};
+
+export const deleteProjectInvitation = async ({
+  invitationId,
+}) => {
+  const invitation = await prisma.projectInvitation.findUnique({
+    where: {
+      id: invitationId,
+    },
+  });
+
+  if (!invitation) {
+    throw new Error("Invitation not found.");
+  }
+
+  await prisma.projectInvitation.delete({
+    where: {
+      id: invitationId,
+    },
+  });
+
+  return invitation;
 };

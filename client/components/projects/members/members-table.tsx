@@ -97,7 +97,6 @@ export default function MembersTable({
               key={member.id}
               className="border-b transition hover:bg-muted/30"
             >
-              {/* User */}
 
               <td className="px-6 py-5">
                 <div className="flex items-center gap-4">
@@ -122,7 +121,6 @@ export default function MembersTable({
                 </div>
               </td>
 
-              {/* Role */}
 
               <td className="px-6 py-5">
                 <Badge variant="secondary" className="gap-1">
@@ -132,13 +130,11 @@ export default function MembersTable({
                 </Badge>
               </td>
 
-              {/* Joined */}
 
               <td className="px-6 py-5 text-sm text-muted-foreground">
                 {new Date(member.joinedAt).toLocaleDateString()}
               </td>
 
-              {/* Status */}
 
               <td className="px-6 py-5">
                 <Badge variant="outline" className="text-green-600">
@@ -146,7 +142,6 @@ export default function MembersTable({
                 </Badge>
               </td>
 
-              {/* Actions */}
 
               <td className="px-6 py-5 text-right">
                 <DropdownMenu>

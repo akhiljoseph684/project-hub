@@ -1,4 +1,9 @@
 import redisClient from "../../config/redis.js";
+import {
+  emitProjectInvitation,
+  emitProjectMemberAdded,
+  emitProjectMemberRemoved,
+} from "../../socket/socket-events.js";
 import * as projectService from "../services/project.service.js";
 
 export const searchUsers = async (req, res) => {
@@ -21,8 +26,8 @@ export const searchUsers = async (req, res) => {
     });
 
     const results = await multi.exec();
-
     console.log(results);
+
     const usersWithStatus = users.map((user, index) => ({
       ...user,
       isOnline: results[index] === 1,
@@ -206,6 +211,8 @@ export const removeProjectMemberController = async (req, res, next) => {
       memberId,
     });
 
+    emitProjectMemberRemoved(member.userId, member.id);
+
     return res.status(200).json({
       success: true,
       message: "Project member removed successfully.",
@@ -228,6 +235,8 @@ export const createProjectInvitationController = async (req, res, next) => {
       userId,
       roleId,
     });
+
+    emitProjectInvitation(userId, invitation);
 
     return res.status(201).json({
       success: true,
@@ -268,6 +277,8 @@ export const acceptProjectInvitationController = async (req, res, next) => {
       userId: req.user.id,
     });
 
+    emitProjectMemberAdded(member.userId, member);
+
     return res.status(200).json({
       success: true,
       message: "Invitation accepted successfully.",
@@ -296,11 +307,7 @@ export const declineProjectInvitationController = async (req, res, next) => {
   }
 };
 
-export const deleteProjectInvitationController = async (
-  req,
-  res,
-  next,
-) => {
+export const deleteProjectInvitationController = async (req, res, next) => {
   try {
     const { invitationId } = req.params;
 
@@ -311,6 +318,22 @@ export const deleteProjectInvitationController = async (
     return res.status(200).json({
       success: true,
       message: "Invitation cancelled successfully.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMyProjectInvitationsController = async (req, res, next) => {
+  try {
+    const invitations = await projectService.getMyProjectInvitations(
+      req.user.id,
+      req.params.status
+    );
+
+    res.status(200).json({
+      success: true,
+      invitations,
     });
   } catch (error) {
     next(error);

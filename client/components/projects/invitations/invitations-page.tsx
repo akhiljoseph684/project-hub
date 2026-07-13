@@ -7,11 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import { useAppSelector } from "@/redux/hooks";
-import { deleteProjectInvitation, getProjectInvitations } from "@/services/project.service";
+import {
+  deleteProjectInvitation,
+  getProjectInvitations,
+} from "@/services/project.service";
 import { showErrorToast } from "@/lib/toast";
 
 import InvitationsTable from "./invitations-table";
 import CancelInvitationDialog from "./cancel-invitation-dialog";
+import useProjectInvitationSocket from "@/hooks/use-project-invitation-socket";
 
 export interface ProjectInvitation {
   id: string;
@@ -44,21 +48,12 @@ export default function InvitationsPage() {
   const project = useAppSelector((state) => state.project.currentProject);
 
   const [loading, setLoading] = useState(false);
-
   const [invitations, setInvitations] = useState<ProjectInvitation[]>([]);
-
   const [selectedInvitation, setSelectedInvitation] =
     useState<ProjectInvitation | null>(null);
 
   const [cancelOpen, setCancelOpen] = useState(false);
-
   const [cancelLoading, setCancelLoading] = useState(false);
-
-  useEffect(() => {
-    if (project?.id) {
-      fetchInvitations();
-    }
-  }, [project?.id]);
 
   async function fetchInvitations() {
     try {
@@ -76,9 +71,19 @@ export default function InvitationsPage() {
     }
   }
 
+  useEffect(() => {
+    if (project?.id) {
+      fetchInvitations();
+    }
+  }, [project?.id]);
+
+  // ✅ Call the custom hook here, at the top level
+  useProjectInvitationSocket({
+    onRefresh: fetchInvitations,
+  });
+
   return (
     <div className="space-y-6">
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Project Invitations</h1>
@@ -88,9 +93,15 @@ export default function InvitationsPage() {
           </p>
         </div>
 
-        <Button variant="outline" onClick={fetchInvitations} disabled={loading}>
+        <Button
+          variant="outline"
+          onClick={fetchInvitations}
+          disabled={loading}
+        >
           <RefreshCw
-            className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
+            className={`mr-2 h-4 w-4 ${
+              loading ? "animate-spin" : ""
+            }`}
           />
           Refresh
         </Button>
@@ -100,7 +111,6 @@ export default function InvitationsPage() {
         <div className="flex items-center justify-between border-b px-6 py-4">
           <div className="flex items-center gap-2">
             <Mail className="h-5 w-5" />
-
             <h2 className="font-semibold">Invitations</h2>
           </div>
 
@@ -137,6 +147,7 @@ export default function InvitationsPage() {
 
             try {
               await deleteProjectInvitation(selectedInvitation.id);
+
               await fetchInvitations();
             } finally {
               setCancelLoading(false);

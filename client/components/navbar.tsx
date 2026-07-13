@@ -11,6 +11,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAppSelector } from "@/redux/hooks";
 import UserAvatar from "./user-avatar";
+import NotificationBell from "./notification-bell";
 
 export default function DashboardNavbar() {
   const [open, setOpen] = useState(false);
@@ -65,9 +66,7 @@ export default function DashboardNavbar() {
               Create
             </Button>
           </Link>
-          <Button variant="outline" size="icon">
-            <Bell className="h-4 w-4" />
-          </Button>
+            <NotificationBell />
           <Link href="/profile">
             <div className="flex items-center gap-3 border-l pl-3 md:hidden">
               <UserAvatar

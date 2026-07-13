@@ -320,7 +320,9 @@ export const acceptProjectInvitation = async (invitationId: string) => {
 
 export const declineProjectInvitation = async (invitationId: string) => {
   try {
-    const res = await api.patch(`/projects/invitations/${invitationId}/decline`);
+    const res = await api.patch(
+      `/projects/invitations/${invitationId}/decline`,
+    );
 
     return res.data;
   } catch (error: any) {
@@ -333,16 +335,32 @@ export const declineProjectInvitation = async (invitationId: string) => {
   }
 };
 
-export const deleteProjectInvitation = async (
-  invitationId: string,
-) => {
+export const deleteProjectInvitation = async (invitationId: string) => {
   try {
-    const res = await api.delete(
-    `/projects/invitations/${invitationId}`,
-  );
+    const res = await api.delete(`/projects/invitations/${invitationId}`);
 
-  return res.data;
+    return res.data;
   } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const getMyProjectInvitations = async (status?: "PENDING" | "ACCEPTED" | "DECLINED",) => {
+  try {
+    const res = await api.get("/projects/invitations/me", {
+      params: {
+        status,
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    console.log(error)
     throw (
       error.response?.data || {
         success: false,

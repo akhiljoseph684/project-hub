@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { socket } from "@/lib/socket";
-import { useAppSelector } from "@/redux/hooks";
 import { useDispatch } from "react-redux";
 
-import { userOnline, userOffline } from "@/redux/slices/socketSlice";
+import { socket } from "@/lib/socket";
+import { useAppSelector } from "@/redux/hooks";
+import { setOnlineUsers } from "@/redux/slices/socketSlice";
 
 export default function SocketProvider({
   children,
@@ -14,33 +14,49 @@ export default function SocketProvider({
 }) {
   const dispatch = useDispatch();
 
-  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { user } = useAppSelector(
+    (state) => state.auth,
+  );
 
   useEffect(() => {
-    if (!isAuthenticated || !user) return;
+    if (!user) {
+      socket.disconnect();
+      dispatch(setOnlineUsers({}));
+      return;
+    }
 
     socket.connect();
 
-    socket.on("connect", () => {
-      socket.emit("join", user.id);
-    });
+    const handleConnect = () => {
+      console.log("Socket Connected:", socket.id);
 
-    socket.on("user-online", (userId: string) => {
-      dispatch(userOnline(userId));
-    });
+      socket.emit("user:online", user.id);
+    };
 
-    socket.on("user-offline", (userId: string) => {
-      dispatch(userOffline(userId));
-    });
+    const handleOnlineUsers = (
+      users: Record<string, string>,
+    ) => {
+      console.log("ONLINE USERS:", users);
+
+      dispatch(setOnlineUsers(users));
+    };
+
+    socket.on("connect", handleConnect);
+
+    socket.on("online-users", handleOnlineUsers);
+
+    if (socket.connected) {
+      console.log("-a-a-a-a-a-a-")
+      handleConnect();
+    }
 
     return () => {
-      socket.off("connect");
-      socket.off("user-online");
-      socket.off("user-offline");
+      socket.off("connect", handleConnect);
+      socket.off("online-users", handleOnlineUsers);
 
       socket.disconnect();
     };
-  }, [dispatch, isAuthenticated, user]);
+  }, [dispatch, user]);
 
   return <>{children}</>;
 }

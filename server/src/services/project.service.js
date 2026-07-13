@@ -888,9 +888,7 @@ export const declineProjectInvitation = async ({ invitationId, userId }) => {
   });
 };
 
-export const deleteProjectInvitation = async ({
-  invitationId,
-}) => {
+export const deleteProjectInvitation = async ({ invitationId }) => {
   const invitation = await prisma.projectInvitation.findUnique({
     where: {
       id: invitationId,
@@ -908,4 +906,31 @@ export const deleteProjectInvitation = async ({
   });
 
   return invitation;
+};
+
+export const getMyProjectInvitations = async (userId, status) => {
+  let where = {
+    userId,
+  }
+  if (status) {
+    where.status = status;
+  }
+  return prisma.projectInvitation.findMany({
+    where,
+    include: {
+      project: true,
+      invitedBy: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
+        },
+      },
+      role: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 };

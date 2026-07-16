@@ -1,7 +1,12 @@
-import React from 'react'
+import BoardPage from "./board-page";
 
-export default function page() {
-  return (
-    <div>Board</div>
-  )
+interface PageProps {
+  params: Promise<{
+    slug: string;
+  }>;
+}
+
+export default async function Page() {
+
+  return <BoardPage />;
 }

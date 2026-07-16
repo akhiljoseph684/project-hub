@@ -116,8 +116,6 @@ export default function CreateProjectForm() {
           <ProjectTimeline form={form} />
 
           <ProjectFeatures form={form} />
-
-          {/* <ProjectMembers form={form} /> */}
         </div>
 
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">

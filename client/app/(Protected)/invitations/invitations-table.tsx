@@ -33,7 +33,6 @@ export default function InvitationsTable({
           key={invitation.id}
           className="flex flex-col gap-6 p-6 lg:flex-row lg:items-center lg:justify-between"
         >
-          {/* Left */}
 
           <div className="flex items-start gap-4">
             <UserAvatar
@@ -71,7 +70,6 @@ export default function InvitationsTable({
             </div>
           </div>
 
-          {/* Right */}
 
           <InvitationActions invitation={invitation} onRefresh={onRefresh} />
         </div>

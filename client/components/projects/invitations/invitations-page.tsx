@@ -77,7 +77,6 @@ export default function InvitationsPage() {
     }
   }, [project?.id]);
 
-  // ✅ Call the custom hook here, at the top level
   useProjectInvitationSocket({
     onRefresh: fetchInvitations,
   });

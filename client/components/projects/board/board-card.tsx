@@ -47,6 +47,7 @@ export interface BoardTask {
     completed: number;
     total: number;
   };
+  columnId: string;
 
   onClick?: () => void;
 }

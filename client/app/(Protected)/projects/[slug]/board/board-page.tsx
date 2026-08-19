@@ -1,260 +1,164 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import BoardHeader from "@/components/projects/board/board-header";
 import BoardToolbar from "@/components/projects/board/board-toolbar";
-import BoardList, { BoardColumnData } from "@/components/projects/board/board-list";
+import BoardList, {
+  BoardColumnData,
+} from "@/components/projects/board/board-list";
 import BoardEmpty from "@/components/projects/board/board-empty";
 import CreateTaskDialog from "@/components/projects/task/create-task-dialog";
 
+import { useAppSelector } from "@/redux/hooks";
+
+import { getProjectBoard, getProjectMembers } from "@/services/project.service";
+
+import { showErrorToast } from "@/lib/toast";
+import { getProjectLabels } from "@/services/label.service";
+
+interface BoardMember {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
+interface BoardLabel {
+  id: string;
+  name: string;
+  color: string;
+}
+
+interface BoardStatus {
+  id: string;
+  name: string;
+  color: string;
+}
+
 export default function BoardPage() {
+  const project = useAppSelector((state) => state.project.currentProject);
+
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const project = {
-    id: "1",
-    name: "ProjectHub",
-    key: "PH",
-    slug: "projecthub",
-    visibility: "PRIVATE" as const,
-    color: "#2563EB",
-  };
+  const [columns, setColumns] = useState<BoardColumnData[]>([]);
 
-  const statuses = [
-    {
-      id: "todo",
-      name: "Todo",
-      color: "#3B82F6",
-    },
-    {
-      id: "progress",
-      name: "In Progress",
-      color: "#F59E0B",
-    },
-    {
-      id: "done",
-      name: "Done",
-      color: "#22C55E",
-    },
-  ];
+  const [statuses, setStatuses] = useState<BoardStatus[]>([]);
 
-  const members = [
-    {
-      id: "1",
-      name: "Akhil Joseph",
-      email: "akhil@gmail.com",
-    },
-  ];
+  const [members, setMembers] = useState<BoardMember[]>([]);
 
-  const labels = [
-    {
-      id: "1",
-      name: "Frontend",
-      color: "#3B82F6",
-    },
-  ];
+  const [labels, setLabels] = useState<BoardLabel[]>([]);
 
-  const columns = [
-    {
-      id: "todo",
-      title: "To Do",
-      color: "#3B82F6",
-      tasks: [
-        {
-          id: "1",
-          key: "PH-1",
-          title: "Design Login Page",
-          description: "Create responsive login and register pages.",
-          priority: "HIGH",
-          dueDate: "2026-07-25",
+  const [loading, setLoading] = useState(false);
 
-          assignee: {
-            id: "1",
-            name: "Akhil Joseph",
-          },
+  const [defaultStatusId, setDefaultStatusId] = useState("");
 
-          labels: [
-            {
-              id: "1",
-              name: "Frontend",
-              color: "#3B82F6",
-            },
-          ],
 
-          commentsCount: 4,
-          attachmentsCount: 2,
+  const fetchBoard = useCallback(async () => {
+    if (!project?.id) return;
 
-          checklist: {
-            completed: 2,
-            total: 5,
-          },
-        },
+    try {
+      setLoading(true);
 
-        {
-          id: "2",
-          key: "PH-2",
-          title: "Create Authentication API",
-          description: "Implement login, register and refresh token endpoints.",
-          priority: "URGENT",
+      const res = await getProjectBoard(project.id);
 
-          assignee: {
-            id: "2",
-            name: "John Doe",
-          },
+      setColumns(res.board);
 
-          labels: [
-            {
-              id: "2",
-              name: "Backend",
-              color: "#22C55E",
-            },
-          ],
+      const boardStatuses = res.board.map((column: BoardColumnData) => ({
+        id: column.id,
+        name: column.title,
+        color: column.color,
+      }));
 
-          commentsCount: 3,
-          attachmentsCount: 1,
+      setStatuses(boardStatuses);
+    } catch (error: any) {
+      console.error("Fetch Board Error:", error);
 
-          checklist: {
-            completed: 5,
-            total: 8,
-          },
-        },
-      ],
-    },
+      showErrorToast(error.message || "Failed to load project board.");
+    } finally {
+      setLoading(false);
+    }
+  }, [project?.id]);
 
-    {
-      id: "progress",
-      title: "In Progress",
-      color: "#F59E0B",
-      tasks: [
-        {
-          id: "3",
-          key: "PH-3",
-          title: "Project Settings Page",
-          description: "Complete roles & permissions section.",
-          priority: "MEDIUM",
+  const fetchMembers = useCallback(async () => {
+    if (!project?.id) return;
 
-          assignee: {
-            id: "1",
-            name: "Akhil Joseph",
-          },
+    try {
+      const res = await getProjectMembers(project.id);
 
-          labels: [
-            {
-              id: "3",
-              name: "Feature",
-              color: "#A855F7",
-            },
-          ],
+      const formattedMembers = res.members.map((member: any) => ({
+        id: member.user.id,
+        name: `${member.user.firstName || ""} ${
+          member.user.lastName || ""
+        }`.trim(),
+        email: member.user.email,
+        avatar: member.user.avatar,
+      }));
 
-          commentsCount: 1,
-          attachmentsCount: 0,
+      setMembers(formattedMembers);
+    } catch (error: any) {
+      console.error("Fetch Members Error:", error);
 
-          checklist: {
-            completed: 3,
-            total: 6,
-          },
-        },
-      ],
-    },
+      showErrorToast(error.message || "Failed to load project members.");
+    }
+  }, [project?.id]);
 
-    {
-      id: "review",
-      title: "Review",
-      color: "#8B5CF6",
-      tasks: [
-        {
-          id: "4",
-          key: "PH-4",
-          title: "Dashboard UI",
-          description: "Waiting for code review.",
-          priority: "LOW",
+  const fetchLabels = useCallback(async () => {
+    if (!project?.id) return;
 
-          assignee: {
-            id: "2",
-            name: "John Doe",
-          },
+    try {
+      const res = await getProjectLabels(project.id);
 
-          labels: [
-            {
-              id: "4",
-              name: "UI",
-              color: "#EC4899",
-            },
-          ],
+      setLabels(res.labels);
+    } catch (error: any) {
+      console.error("Fetch Members Error:", error);
 
-          commentsCount: 7,
-          attachmentsCount: 0,
+      showErrorToast(error.message || "Failed to load project members.");
+    }
+  }, [project?.id]);
 
-          checklist: {
-            completed: 6,
-            total: 6,
-          },
-        },
-      ],
-    },
+  useEffect(() => {
+    if (!project?.id) return;
 
-    {
-      id: "done",
-      title: "Done",
-      color: "#22C55E",
-      tasks: [
-        {
-          id: "5",
-          key: "PH-5",
-          title: "Create Project Module",
-          description: "Project creation completed successfully.",
-          priority: "MEDIUM",
+    fetchBoard();
+    fetchMembers();
+    fetchLabels()
+  }, [project?.id, fetchBoard, fetchMembers, fetchLabels]);
 
-          assignee: {
-            id: "1",
-            name: "Akhil Joseph",
-          },
-
-          labels: [
-            {
-              id: "5",
-              name: "Completed",
-              color: "#10B981",
-            },
-          ],
-
-          commentsCount: 12,
-          attachmentsCount: 3,
-
-          checklist: {
-            completed: 10,
-            total: 10,
-          },
-        },
-      ],
-    },
-    ] satisfies BoardColumnData[];
+  if (!project) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
-
       <BoardToolbar
         search=""
-        sprint="all"
         assignee="all"
         priority="all"
-        view="board"
         onSearchChange={() => {}}
-        onSprintChange={() => {}}
         onAssigneeChange={() => {}}
         onPriorityChange={() => {}}
-        onViewChange={() => {}}
         onResetFilters={() => {}}
         onCreateTask={() => setDialogOpen(true)}
       />
 
-      {columns.length === 0 ? (
+      {loading ? (
+        <div className="flex min-h-[400px] items-center justify-center">
+          <p className="text-muted-foreground">Loading board...</p>
+        </div>
+      ) : columns.length === 0 ? (
         <BoardEmpty onCreateTask={() => setDialogOpen(true)} />
       ) : (
         <BoardList
           columns={columns}
-          onTaskClick={(task) => console.log(task)}
-          onCreateTask={(columnId) => console.log("Create task in:", columnId)}
+          setColumns={setColumns}
+          onTaskClick={(task) => {
+            console.log("Task clicked:", task);
+          }}
+          onCreateTask={(columnId) => {
+            setDefaultStatusId(columnId)
+
+            setDialogOpen(true);
+          }}
         />
       )}
 
@@ -265,9 +169,11 @@ export default function BoardPage() {
         statuses={statuses}
         members={members}
         labels={labels}
-        defaultStatusId={statuses[0].id}
+        defaultStatusId={defaultStatusId ?? statuses[0]?.id}
         onSuccess={() => {
-          console.log("Task Created");
+          setDialogOpen(false);
+          setDefaultStatusId("");
+          fetchBoard();
         }}
       />
     </div>

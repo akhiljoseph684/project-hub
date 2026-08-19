@@ -10,6 +10,8 @@ import authRoutes from "./src/routes/auth.route.js";
 import projectRoutes from "./src/routes/project.route.js";
 import subscriptionRoutes from "./src/routes/subscription.route.js";
 import userRoutes from "./src/routes/user.route.js";
+import labelRoutes from "./src/routes/label.route.js";
+import taskRoutes from "./src/routes/task.route.js";
 
 import http from "http";
 import { initializeSocket } from "./socket/index.js";
@@ -48,6 +50,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/labels", labelRoutes);
+app.use("/api/task", taskRoutes);
 
 app.use(errorHandler);
 

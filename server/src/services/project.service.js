@@ -911,7 +911,7 @@ export const deleteProjectInvitation = async ({ invitationId }) => {
 export const getMyProjectInvitations = async (userId, status) => {
   let where = {
     userId,
-  }
+  };
   if (status) {
     where.status = status;
   }
@@ -932,5 +932,36 @@ export const getMyProjectInvitations = async (userId, status) => {
     orderBy: {
       createdAt: "desc",
     },
+  });
+};
+
+export const createTaskStatues = async (projectId) => {
+  const statuses = await prisma.taskStatus.createMany({
+    data: [
+      {
+        projectId,
+        name: "To Do",
+        color: "#3B82F6",
+        position: 0,
+      },
+      {
+        projectId,
+        name: "In Progress",
+        color: "#F59E0B",
+        position: 1,
+      },
+      {
+        projectId,
+        name: "Review",
+        color: "#8B5CF6",
+        position: 2,
+      },
+      {
+        projectId,
+        name: "Done",
+        color: "#22C55E",
+        position: 3,
+      },
+    ],
   });
 };

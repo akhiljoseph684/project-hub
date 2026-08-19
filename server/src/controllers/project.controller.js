@@ -5,6 +5,7 @@ import {
   emitProjectMemberRemoved,
 } from "../../socket/socket-events.js";
 import * as projectService from "../services/project.service.js";
+import * as taskService from "../services/task.service.js";
 
 export const searchUsers = async (req, res) => {
   try {
@@ -49,12 +50,13 @@ export const searchUsers = async (req, res) => {
 
 export const createProject = async (req, res, next) => {
   try {
-    console.log(req.file);
     const project = await projectService.createProject({
       ownerId: req.user.id,
       body: req.body,
       file: req.file,
     });
+
+    await projectService.createTaskStatues(project.id);
 
     return res.status(201).json({
       success: true,
@@ -328,12 +330,30 @@ export const getMyProjectInvitationsController = async (req, res, next) => {
   try {
     const invitations = await projectService.getMyProjectInvitations(
       req.user.id,
-      req.params.status
+      req.params.status,
     );
 
     res.status(200).json({
       success: true,
       invitations,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProjectBoardController = async (req, res, next) => {
+  try {
+    const { projectId } = req.params;
+
+    const board = await taskService.getProjectBoard({
+      projectId,
+      userId: req.user.id,
+    });
+
+    return res.status(200).json({
+      success: true,
+      board,
     });
   } catch (error) {
     next(error);

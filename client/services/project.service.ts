@@ -350,7 +350,9 @@ export const deleteProjectInvitation = async (invitationId: string) => {
   }
 };
 
-export const getMyProjectInvitations = async (status?: "PENDING" | "ACCEPTED" | "DECLINED",) => {
+export const getMyProjectInvitations = async (
+  status?: "PENDING" | "ACCEPTED" | "DECLINED",
+) => {
   try {
     const res = await api.get("/projects/invitations/me", {
       params: {
@@ -360,7 +362,23 @@ export const getMyProjectInvitations = async (status?: "PENDING" | "ACCEPTED" | 
 
     return res.data;
   } catch (error: any) {
-    console.log(error)
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+
+
+export const getProjectBoard = async (projectId: string) => {
+  try {
+    const res = await api.get(`/projects/${projectId}/board`);
+
+    return res.data;
+  } catch (error: any) {
     throw (
       error.response?.data || {
         success: false,

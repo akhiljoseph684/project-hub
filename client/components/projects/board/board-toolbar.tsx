@@ -44,14 +44,10 @@ interface BoardToolbarProps {
 export default function BoardToolbar({
   search = "",
   onSearchChange,
-  sprint = "all",
-  onSprintChange,
   assignee = "all",
   onAssigneeChange,
   priority = "all",
   onPriorityChange,
-  view = "board",
-  onViewChange,
   onResetFilters,
   onCreateTask,
 }: BoardToolbarProps) {

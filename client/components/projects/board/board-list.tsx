@@ -1,7 +1,22 @@
 "use client";
 
+import {
+  DndContext,
+  closestCorners,
+  DragEndEvent,
+  DragOverEvent,
+} from "@dnd-kit/core";
+
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+
 import BoardColumn from "./board-column";
-import BoardCard, { BoardTask } from "./board-card";
+import DraggableCard from "./draggable-card";
+import { BoardTask } from "./board-card";
+import { updateTaskStatus } from "@/services/task.service";
+import { showErrorToast } from "@/lib/toast";
 
 export interface BoardColumnData {
   id: string;
@@ -13,6 +28,8 @@ export interface BoardColumnData {
 interface BoardListProps {
   columns: BoardColumnData[];
 
+  setColumns: React.Dispatch<React.SetStateAction<BoardColumnData[]>>;
+
   onTaskClick?: (task: BoardTask) => void;
 
   onCreateTask?: (columnId: string) => void;
@@ -20,33 +37,101 @@ interface BoardListProps {
 
 export default function BoardList({
   columns,
+  setColumns,
   onTaskClick,
   onCreateTask,
 }: BoardListProps) {
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    const taskId = String(active.id);
+
+    const targetColumn = columns.find((column) =>
+      column.tasks.some((task) => task.id === taskId),
+    );
+
+    if (!targetColumn) return;
+
+    const newStatusId = targetColumn.id;
+
+    try {
+      const response = await updateTaskStatus(taskId, newStatusId);
+
+      console.log("Status updated:", response);
+    } catch (error: any) {
+      console.error("Failed to update task status:", error);
+      showErrorToast(error.message)
+    }
+  }
+
+  function handleDragOver(event: DragOverEvent) {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    const activeColumnId = active.data.current?.columnId;
+    const overColumnId = over.data.current?.columnId ?? over.id;
+
+    if (activeColumnId === overColumnId) return;
+
+    setColumns((prev) => {
+      const updated = structuredClone(prev);
+
+      const source = updated.find((c) => c.id === activeColumnId);
+      const target = updated.find((c) => c.id === overColumnId);
+
+      if (!source || !target) return prev;
+
+      const index = source.tasks.findIndex((t) => t.id === active.id);
+      if (index === -1) return prev;
+
+      const [task] = source.tasks.splice(index, 1);
+      target.tasks.push(task);
+
+      return updated;
+    });
+  }
+
   return (
-    <div className="overflow-x-auto">
-      <div className="flex h-full gap-5 pb-4">
-        {columns.map((column) => (
-          <BoardColumn
-            key={column.id}
-            id={column.id}
-            title={column.title}
-            color={column.color}
-            taskCount={column.tasks.length}
-            onCreateTask={() => onCreateTask?.(column.id)}
-          >
-            {column.tasks.map((task) => (
-              <BoardCard
-                key={task.id}
-                task={{
-                  ...task,
-                  onClick: () => onTaskClick?.(task),
-                }}
-              />
-            ))}
-          </BoardColumn>
-        ))}
+    <DndContext
+      collisionDetection={closestCorners}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="overflow-x-auto overflow-y-hidden">
+        <div className="flex h-full gap-5 pb-4">
+          {columns.map((column) => (
+            <BoardColumn
+              key={column.id}
+              id={column.id}
+              title={column.title}
+              color={column.color}
+              taskCount={column.tasks.length}
+              onCreateTask={() => onCreateTask?.(column.id)}
+            >
+              <SortableContext
+                items={column.tasks.map((task) => task.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {column.tasks.map((task) => (
+                    <DraggableCard
+                      key={task.id}
+                      task={{
+                        ...task,
+                        onClick: () => onTaskClick?.(task),
+                      }}
+                      columnId={column.id}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </BoardColumn>
+          ))}
+        </div>
       </div>
-    </div>
+    </DndContext>
   );
 }

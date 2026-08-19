@@ -73,7 +73,7 @@ export default function TaskAssignee({
                     variant="outline"
                     disabled={loading}
                     className={cn(
-                      "justify-start",
+                      "justify-start h-12",
                       !field.value && "text-muted-foreground",
                     )}
                   >

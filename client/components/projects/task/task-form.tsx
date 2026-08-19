@@ -18,6 +18,8 @@ import TaskLabels from "./task-labels";
 import TaskDueDate from "./task-due-date";
 
 import { createTaskSchema, CreateTaskInput } from "@/lib/validations/task";
+import { showSuccessToast } from "@/lib/toast";
+import { createTask } from "@/services/task.service";
 
 interface ProjectStatus {
   id: string;
@@ -90,11 +92,9 @@ export default function TaskForm({
 
       console.log(values);
     
-      // const res = await createTask(values);
+      const res = await createTask(projectId, values);
     
-      // showSuccessToast(res.message);
-    
-      // onSuccess?.();
+      showSuccessToast(res.message);
 
       onSuccess?.();
     } catch (error) {

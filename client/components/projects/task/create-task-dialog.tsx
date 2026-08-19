@@ -58,7 +58,6 @@ export default function CreateTaskDialog({
   onSuccess,
 }: CreateTaskDialogProps) {
   const handleSuccess = () => {
-    onOpenChange(false);
     onSuccess?.();
   };
 

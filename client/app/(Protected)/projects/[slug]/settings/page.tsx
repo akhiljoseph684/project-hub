@@ -21,9 +21,13 @@ import {
   updateProjectSchema,
   UpdateProjectInput,
 } from "@/lib/validations/project";
+import LabelsPage from "@/components/projects/settings/labels/labels-page";
+import { useAppSelector } from "@/redux/hooks";
 
 export default function ProjectSettingsPage() {
   const [tab, setTab] = useState("general");
+
+  const project = useAppSelector((state) => state.project.currentProject);
 
   const form = useForm<UpdateProjectInput>({
     resolver: zodResolver(updateProjectSchema),
@@ -48,6 +52,8 @@ export default function ProjectSettingsPage() {
 
     // await updateProject(values);
   };
+
+  if(!project)return
 
   return (
     <Form {...form}>
@@ -76,8 +82,8 @@ export default function ProjectSettingsPage() {
               General
             </TabsTrigger>
 
-            <TabsTrigger value="features">
-              Features
+            <TabsTrigger value="labels">
+              Labels
             </TabsTrigger>
 
             <TabsTrigger value="roles">
@@ -93,8 +99,8 @@ export default function ProjectSettingsPage() {
             <SettingsGeneral form={form} />
           </TabsContent>
 
-          <TabsContent value="features">
-            <SettingsFeatures />
+          <TabsContent value="labels">
+            <LabelsPage projectId={project.id} />
           </TabsContent>
 
           <TabsContent value="roles">

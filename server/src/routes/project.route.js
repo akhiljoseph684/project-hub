@@ -18,6 +18,7 @@ import {
   declineProjectInvitationController,
   deleteProjectInvitationController,
   getMyProjectInvitationsController,
+  getProjectBoardController,
 } from "../controllers/project.controller.js";
 import { verifyUser } from "../middleware/auth.middleware.js";
 import upload from "../middleware/upload.middleware.js";
@@ -74,10 +75,8 @@ router.delete(
   deleteProjectInvitationController,
 );
 
-router.get(
-  "/invitations/me",
-  verifyUser,
-  getMyProjectInvitationsController,
-);
+router.get("/invitations/me", verifyUser, getMyProjectInvitationsController);
+
+router.get("/:projectId/board", verifyUser, getProjectBoardController);
 
 export default router;

@@ -22,6 +22,8 @@ import {
 } from "../controllers/project.controller.js";
 import { verifyUser } from "../middleware/auth.middleware.js";
 import upload from "../middleware/upload.middleware.js";
+import { PERMISSIONS } from "../../constants/permissions.js";
+import { requireProjectPermission } from "../middleware/project-permission.middleware.js";
 
 const router = express.Router();
 
@@ -30,25 +32,28 @@ router.post("/", verifyUser, upload.single("icon"), createProject);
 router.get("/", verifyUser, getProjects);
 router.get("/:slug", verifyUser, getProjectBySlug);
 
-router.post("/:projectId/roles", verifyUser, createRole);
-router.patch("/roles/:roleId", verifyUser, updateRole);
-router.delete("/roles/:roleId", verifyUser, deleteRole);
+router.post("/:projectId/roles", verifyUser, requireProjectPermission(PERMISSIONS.ROLE_CREATE), createRole);
+router.patch("/:projectId/roles/:roleId", verifyUser, requireProjectPermission(PERMISSIONS.ROLE_UPDATE), updateRole);
+router.delete("/:projectId/roles/:roleId", verifyUser, requireProjectPermission(PERMISSIONS.ROLE_DELETE), deleteRole);
 router.get("/:projectId/roles", verifyUser, getProjectRoles);
 
 router.get("/:projectId/members", verifyUser, getProjectMembersController);
 router.patch(
   "/:projectId/members/:memberId",
   verifyUser,
+  requireProjectPermission(PERMISSIONS.MEMBER_UPDATE_ROLE),
   updateProjectMemberRoleController,
 );
 router.delete(
   "/:projectId/members/:memberId",
   verifyUser,
+  requireProjectPermission(PERMISSIONS.MEMBER_REMOVE),
   removeProjectMemberController,
 );
 router.post(
   "/:projectId/invitations",
   verifyUser,
+  requireProjectPermission(PERMISSIONS.MEMBER_INVITE),
   createProjectInvitationController,
 );
 router.get(
@@ -77,6 +82,6 @@ router.delete(
 
 router.get("/invitations/me", verifyUser, getMyProjectInvitationsController);
 
-router.get("/:projectId/board", verifyUser, getProjectBoardController);
+router.get("/:projectId/board", verifyUser, requireProjectPermission(PERMISSIONS.PROJECT_VIEW),  getProjectBoardController);
 
 export default router;

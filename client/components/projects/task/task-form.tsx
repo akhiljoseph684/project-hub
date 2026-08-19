@@ -89,8 +89,6 @@ export default function TaskForm({
   async function onSubmit(values: CreateTaskInput) {
     try {
       setLoading(true);
-
-      console.log(values);
     
       const res = await createTask(projectId, values);
     

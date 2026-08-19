@@ -28,7 +28,6 @@ export default function SocketProvider({
     socket.connect();
 
     const handleConnect = () => {
-      console.log("Socket Connected:", socket.id);
 
       socket.emit("user:online", user.id);
     };
@@ -36,7 +35,6 @@ export default function SocketProvider({
     const handleOnlineUsers = (
       users: Record<string, string>,
     ) => {
-      console.log("ONLINE USERS:", users);
 
       dispatch(setOnlineUsers(users));
     };
@@ -46,7 +44,6 @@ export default function SocketProvider({
     socket.on("online-users", handleOnlineUsers);
 
     if (socket.connected) {
-      console.log("-a-a-a-a-a-a-")
       handleConnect();
     }
 

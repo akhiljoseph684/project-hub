@@ -162,6 +162,7 @@ export const createProjectRole = async (
 };
 
 export const updateProjectRole = async (
+  projectId: any,
   roleId: string,
   payload: {
     name: string;
@@ -171,7 +172,7 @@ export const updateProjectRole = async (
   },
 ) => {
   try {
-    const res = await api.patch(`/projects/roles/${roleId}`, payload);
+    const res = await api.patch(`/projects/${projectId}/roles/${roleId}`, payload);
 
     return res.data;
   } catch (error: any) {
@@ -184,9 +185,9 @@ export const updateProjectRole = async (
   }
 };
 
-export const deleteProjectRole = async (roleId: string) => {
+export const deleteProjectRole = async (projectId: any, roleId: string) => {
   try {
-    const res = await api.delete(`/projects/roles/${roleId}`);
+    const res = await api.delete(`/projects/${projectId}/roles/${roleId}`);
 
     return res.data;
   } catch (error: any) {

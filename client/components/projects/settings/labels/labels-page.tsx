@@ -58,7 +58,6 @@ export default function LabelsPage({ projectId }: LabelsPageProps) {
   const fetchLabels = async () =>{
     try {
         const res = await getProjectLabels(projectId);
-        console.log(res)
         setLabels(res.labels)
     } catch (error: any) {
         showErrorToast(error.message)

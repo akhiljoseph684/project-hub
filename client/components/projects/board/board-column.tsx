@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import DroppableColumn from "./droppable-column";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BoardColumnProps {
@@ -16,6 +16,8 @@ interface BoardColumnProps {
   children: ReactNode;
 
   onCreateTask?: () => void;
+
+  onDeleteStatus?: (status: any) => void;
 }
 
 export default function BoardColumn({
@@ -25,6 +27,7 @@ export default function BoardColumn({
   taskCount = 0,
   children,
   onCreateTask,
+  onDeleteStatus
 }: BoardColumnProps) {
   return (
     <DroppableColumn id={id}>
@@ -47,9 +50,15 @@ export default function BoardColumn({
               <Badge variant="secondary">{taskCount}</Badge>
             </div>
 
-            <Button size="icon" variant="ghost" onClick={onCreateTask}>
+            <div className="flex gap-3">
+              <Button size="icon" variant="ghost" onClick={onCreateTask}>
               <Plus className="h-4 w-4" />
             </Button>
+
+            <Button size="icon" variant="ghost" onClick={() => onDeleteStatus?.({id, name: title})}>
+              <Trash2 className="h-4 w-4 text-red-500" />
+            </Button>
+            </div>
           </div>
         </div>
 

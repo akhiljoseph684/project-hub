@@ -40,7 +40,6 @@ export default function SettingsRoles() {
   const formRef = useRef<HTMLDivElement>(null);
 
   const project = useAppSelector((state) => state.project.currentProject);
-  console.log(project);
 
   useEffect(() => {
     fetchRoles();
@@ -89,7 +88,7 @@ export default function SettingsRoles() {
 
   async function handleDeleteRole(role: ProjectRole) {
     try {
-      await deleteProjectRole(role.id);
+      await deleteProjectRole(project?.id , role.id);
 
       await fetchRoles();
 
@@ -125,7 +124,7 @@ export default function SettingsRoles() {
       }
     } else {
       try {
-        let { role } = await updateProjectRole(newRole.id, newRole);
+        let { role } = await updateProjectRole(project.id, newRole.id, newRole);
         await fetchRoles();
         showSuccessToast("Role Updated Successfully");
       } catch (error: any) {

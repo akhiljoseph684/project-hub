@@ -25,7 +25,6 @@ export async function createLabel(projectId: string, data: CreateLabelPayload) {
 
     return res.data;
   } catch (error: any) {
-    console.log(error)
     throw (
       error.response?.data || {
         success: false,
@@ -38,8 +37,6 @@ export async function createLabel(projectId: string, data: CreateLabelPayload) {
 export async function getProjectLabels(projectId: string) {
   try {
     const res = await api.get(`/labels/projects/${projectId}/labels`);
-
-    console.log(res);
     return res.data;
   } catch (error: any) {
     throw (

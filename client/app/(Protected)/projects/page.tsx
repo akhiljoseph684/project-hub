@@ -35,7 +35,6 @@ export default function ProjectsPage() {
 
       const res = await getProjects(page, 12, debouncedSearch);
 
-      console.log(res);
       setData(res);
     } catch (error: any) {
       showErrorToast(error.message);

@@ -87,7 +87,6 @@ export default function CreateProjectForm() {
         formData.append("members", JSON.stringify(member));
       });
 
-      console.log(formData)
       await createProject(formData);
 
       router.push("/projects");

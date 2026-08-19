@@ -1,8 +1,19 @@
 import api from "@/lib/axios";
 
-export const createTask = async (projectId: string, payload: any) => {
+export interface CreateStatusInput {
+  name: string;
+  color: string;
+}
+
+export async function createProjectStatus(
+  projectId: string,
+  data: CreateStatusInput,
+){
   try {
-    const res = await api.post(`/task/${projectId}/`, payload);
+    const res = await api.post(
+      `/status/project/${projectId}/`,
+      data,
+    );
 
     return res.data;
   } catch (error: any) {
@@ -13,13 +24,15 @@ export const createTask = async (projectId: string, payload: any) => {
       }
     );
   }
-};
+}
 
-export async function updateTaskStatus(projectId: any, taskId: string, statusId: string) {
+export async function deleteProjectStatus(
+  statusId: string,
+){
   try {
-    const res = await api.patch(`/task/${projectId}/${taskId}/status`, {
-      statusId,
-    });
+    const res = await api.delete(
+      `/status/${statusId}/`
+    );
 
     return res.data;
   } catch (error: any) {

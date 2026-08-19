@@ -27,7 +27,6 @@ export const searchUsers = async (req, res) => {
     });
 
     const results = await multi.exec();
-    console.log(results);
 
     const usersWithStatus = users.map((user, index) => ({
       ...user,

@@ -15,6 +15,9 @@ import { getProjectBoard, getProjectMembers } from "@/services/project.service";
 
 import { showErrorToast } from "@/lib/toast";
 import { getProjectLabels } from "@/services/label.service";
+import CreateStatusDialog from "@/components/projects/board/create-status-dialog";
+import DeleteStatusDialog from "@/components/projects/board/delete-status-dialog";
+import { Loader2 } from "lucide-react";
 
 interface BoardMember {
   id: string;
@@ -52,6 +55,19 @@ export default function BoardPage() {
 
   const [defaultStatusId, setDefaultStatusId] = useState("");
 
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+
+  const [deleteStatusOpen, setDeleteStatusOpen] = useState(false);
+
+  const [selectedStatus, setSelectedStatus] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  function handleDeleteStatus(status: any) {
+    setSelectedStatus(status);
+    setDeleteStatusOpen(true);
+  }
 
   const fetchBoard = useCallback(async () => {
     if (!project?.id) return;
@@ -121,7 +137,7 @@ export default function BoardPage() {
 
     fetchBoard();
     fetchMembers();
-    fetchLabels()
+    fetchLabels();
   }, [project?.id, fetchBoard, fetchMembers, fetchLabels]);
 
   if (!project) {
@@ -143,19 +159,22 @@ export default function BoardPage() {
 
       {loading ? (
         <div className="flex min-h-[400px] items-center justify-center">
-          <p className="text-muted-foreground">Loading board...</p>
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       ) : columns.length === 0 ? (
         <BoardEmpty onCreateTask={() => setDialogOpen(true)} />
       ) : (
         <BoardList
+          projectId={project.id}
           columns={columns}
           setColumns={setColumns}
+          onCreateStatus={() => setStatusDialogOpen(true)}
+          onDeleteStatus={handleDeleteStatus}
           onTaskClick={(task) => {
             console.log("Task clicked:", task);
           }}
           onCreateTask={(columnId) => {
-            setDefaultStatusId(columnId)
+            setDefaultStatusId(columnId);
 
             setDialogOpen(true);
           }}
@@ -174,6 +193,27 @@ export default function BoardPage() {
           setDialogOpen(false);
           setDefaultStatusId("");
           fetchBoard();
+        }}
+      />
+
+      <CreateStatusDialog
+        open={statusDialogOpen}
+        onOpenChange={setStatusDialogOpen}
+        projectId={project.id}
+        onSuccess={(status: any) => {
+          setStatusDialogOpen(false);
+          fetchBoard();
+        }}
+      />
+
+      <DeleteStatusDialog
+        open={deleteStatusOpen}
+        onOpenChange={setDeleteStatusOpen}
+        status={selectedStatus}
+        onSuccess={(statusId: any) => {
+          fetchBoard()
+
+          setSelectedStatus(null);
         }}
       />
     </div>

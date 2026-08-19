@@ -14,7 +14,6 @@ export const initializeSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log("Socket Connected:", socket.id);
 
     socket.on("user:online", async (userId) => {
       onlineUsers.set(userId, socket.id);
@@ -23,7 +22,6 @@ export const initializeSocket = (server) => {
 
       io.emit("online-users", Object.fromEntries(onlineUsers));
 
-      console.log("User Online:", userId);
     });
 
     socket.on("disconnect", async () => {
@@ -33,15 +31,12 @@ export const initializeSocket = (server) => {
 
           await redisClient.sRem("online-users", userId);
 
-          console.log("User Offline:", userId);
-
           break;
         }
       }
 
       io.emit("online-users", Object.fromEntries(onlineUsers));
 
-      console.log("Socket Disconnected:", socket.id);
     });
   });
 

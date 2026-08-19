@@ -7,6 +7,9 @@ import {
   DragOverEvent,
 } from "@dnd-kit/core";
 
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -17,6 +20,7 @@ import DraggableCard from "./draggable-card";
 import { BoardTask } from "./board-card";
 import { updateTaskStatus } from "@/services/task.service";
 import { showErrorToast } from "@/lib/toast";
+import { useState } from "react";
 
 export interface BoardColumnData {
   id: string;
@@ -26,6 +30,8 @@ export interface BoardColumnData {
 }
 
 interface BoardListProps {
+  projectId: String
+
   columns: BoardColumnData[];
 
   setColumns: React.Dispatch<React.SetStateAction<BoardColumnData[]>>;
@@ -33,14 +39,23 @@ interface BoardListProps {
   onTaskClick?: (task: BoardTask) => void;
 
   onCreateTask?: (columnId: string) => void;
+
+  onCreateStatus?: () => void;
+
+  onDeleteStatus?: (status: any) => void;
+  
 }
 
 export default function BoardList({
+  projectId,
   columns,
   setColumns,
   onTaskClick,
   onCreateTask,
+  onCreateStatus,
+  onDeleteStatus
 }: BoardListProps) {
+
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
@@ -57,12 +72,10 @@ export default function BoardList({
     const newStatusId = targetColumn.id;
 
     try {
-      const response = await updateTaskStatus(taskId, newStatusId);
-
-      console.log("Status updated:", response);
+      const response = await updateTaskStatus(projectId, taskId, newStatusId);
     } catch (error: any) {
       console.error("Failed to update task status:", error);
-      showErrorToast(error.message)
+      showErrorToast(error.message);
     }
   }
 
@@ -94,6 +107,10 @@ export default function BoardList({
     });
   }
 
+  async function handleCreateStatus() {
+
+  }
+
   return (
     <DndContext
       collisionDetection={closestCorners}
@@ -110,6 +127,7 @@ export default function BoardList({
               color={column.color}
               taskCount={column.tasks.length}
               onCreateTask={() => onCreateTask?.(column.id)}
+              onDeleteStatus={onDeleteStatus}
             >
               <SortableContext
                 items={column.tasks.map((task) => task.id)}
@@ -130,6 +148,17 @@ export default function BoardList({
               </SortableContext>
             </BoardColumn>
           ))}
+          <Button
+            type="button"
+            variant="outline"
+            className="min-w-[180px] shrink-0"
+            onClick={() => {
+              onCreateStatus?.()
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Status
+          </Button>
         </div>
       </div>
     </DndContext>

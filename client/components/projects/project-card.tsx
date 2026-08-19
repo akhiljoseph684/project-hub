@@ -17,7 +17,6 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
-  console.log(project);
   return (
     <Card className="group transition-all hover:shadow-lg">
       <CardHeader className="space-y-4">

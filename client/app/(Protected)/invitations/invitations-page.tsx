@@ -56,8 +56,6 @@ export default function InvitationsPage() {
 
       const res = await getMyProjectInvitations();
 
-      console.log(res);
-
       setInvitations(res.invitations);
 
       const pending = res.invitations.filter(
@@ -66,7 +64,6 @@ export default function InvitationsPage() {
 
       dispatch(setInvitationCount(pending));
     } catch (error: any) {
-      console.log(error);
       showErrorToast(error.message);
     } finally {
       setLoading(false);

@@ -12,22 +12,18 @@ export default function useProjectInvitationSocket({
 }: UseProjectInvitationSocketProps) {
   useEffect(() => {
     const handleNewInvitation = () => {
-      console.log("New project invitation");
       onRefresh();
     };
 
     const handleAccepted = () => {
-      console.log("Invitation accepted");
       onRefresh();
     };
 
     const handleDeclined = () => {
-      console.log("Invitation declined");
       onRefresh();
     };
 
     const handleCancelled = () => {
-      console.log("Invitation cancelled");
       onRefresh();
     };
 

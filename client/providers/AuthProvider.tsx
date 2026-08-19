@@ -19,8 +19,6 @@ export default function AuthProvider({
           withCredentials: true,
         });
 
-        console.log(res.data.user);
-
         dispatch(
           setAuth({
             user: res.data.user,

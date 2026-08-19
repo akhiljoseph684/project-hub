@@ -462,7 +462,6 @@ export const getMe = async (req, res) => {
       accessToken,
     });
   } catch (error) {
-    console.log(error.message);
     return res.status(401).json({
       success: false,
       message: "Invalid or expired token",

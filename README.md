@@ -51,7 +51,7 @@ It helps organizations, startups, freelancers, and students manage projects, tra
 ### Clone Repository
 
 ```bash
-git clone https://github.com/akhiljoseph10/Project-Hub.git
+git clone https://github.com/akhiljoseph684/project-hub.git
 ```
 
 ### Install Dependencies

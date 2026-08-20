@@ -151,6 +151,8 @@ export default function ProjectLayout({ children }: Props) {
   async function fetchProjects() {
     try {
       setLoading(true);
+      console.log("slug")
+      console.log(slug)
       let res = await getProjectBySlug(slug as string);
       dispatch(setCurrentProject(res.project));
       setProject(res.project);

@@ -222,7 +222,6 @@ export const getProjectBoard = async ({ projectId, userId }) => {
 };
 
 export async function updateTaskStatus(taskId, statusId) {
-
   const task = await prisma.task.findUnique({
     where: {
       id: taskId,
@@ -260,4 +259,115 @@ export async function updateTaskStatus(taskId, statusId) {
   });
 
   return updatedTask;
+}
+
+export async function getTasksByProject(projectId) {
+  const tasks = await prisma.task.findMany({
+    where: {
+      projectId,
+    },
+
+    orderBy: [
+      {
+        statusId: "asc",
+      },
+      {
+        position: "asc",
+      },
+      {
+        createdAt: "desc",
+      },
+    ],
+
+    include: {
+      status: {
+        select: {
+          id: true,
+          name: true,
+          color: true,
+          position: true,
+        },
+      },
+
+      assignee: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
+        },
+      },
+
+      labels: {
+        include: {
+          label: {
+            select: {
+              id: true,
+              name: true,
+              color: true,
+            },
+          },
+        },
+      },
+
+      _count: {
+        select: {
+          comments: true,
+          attachments: true,
+          checklists: true,
+        },
+      },
+    },
+  });
+
+  return tasks.map((task) => ({
+    id: task.id,
+
+    key: task.key,
+
+    title: task.title,
+
+    description: task.description,
+
+    priority: task.priority,
+
+    dueDate: task.dueDate,
+
+    position: task.position,
+
+    status: {
+      id: task.status.id,
+      name: task.status.name,
+      color: task.status.color,
+      position: task.status.position,
+    },
+
+    assignee: task.assignee
+      ? {
+          id: task.assignee.id,
+
+          name: [task.assignee.firstName, task.assignee.lastName]
+            .filter(Boolean)
+            .join(" "),
+
+          avatar: task.assignee.avatar,
+        }
+      : null,
+
+    labels: task.labels.map((item) => ({
+      id: item.label.id,
+      name: item.label.name,
+      color: item.label.color,
+    })),
+
+    commentsCount: task._count.comments,
+
+    attachmentsCount: task._count.attachments,
+
+    checklistCount: task._count.checklists,
+
+    createdAt: task.createdAt,
+
+    updatedAt: task.updatedAt,
+  }));
 }

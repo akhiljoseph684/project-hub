@@ -35,7 +35,6 @@ export default function TaskDetails({ task }: TaskDetailsProps) {
 
   return (
     <section className="space-y-6">
-      {/* Description */}
       <div>
         <h3 className="mb-3 text-sm font-semibold">Description</h3>
 
@@ -52,12 +51,10 @@ export default function TaskDetails({ task }: TaskDetailsProps) {
 
       <Separator />
 
-      {/* Task information */}
       <div>
         <h3 className="mb-4 text-sm font-semibold">Task Information</h3>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          {/* Status */}
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
               <span
@@ -75,7 +72,6 @@ export default function TaskDetails({ task }: TaskDetailsProps) {
             </div>
           </div>
 
-          {/* Priority */}
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
               <Flag className={`h-4 w-4 ${priority.className}`} />
@@ -88,7 +84,6 @@ export default function TaskDetails({ task }: TaskDetailsProps) {
             </div>
           </div>
 
-          {/* Assignee */}
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
               <User className="h-4 w-4 text-muted-foreground" />
@@ -103,7 +98,6 @@ export default function TaskDetails({ task }: TaskDetailsProps) {
             </div>
           </div>
 
-          {/* Due date */}
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
               <CalendarDays className="h-4 w-4 text-muted-foreground" />
@@ -122,7 +116,6 @@ export default function TaskDetails({ task }: TaskDetailsProps) {
         </div>
       </div>
 
-      {/* Labels */}
       <Separator />
 
       <div>

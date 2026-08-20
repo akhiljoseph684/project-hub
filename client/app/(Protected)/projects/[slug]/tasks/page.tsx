@@ -101,17 +101,6 @@ export default function TasksPage({ params }: TasksPageProps) {
   }
 
   async function handleTaskClick(task: TaskListItem) {
-    /*
-     * For now we convert the list task into the
-     * TaskDetailsData structure.
-     *
-     * Later you should call:
-     *
-     * GET /tasks/:taskId
-     *
-     * to get comments, attachments, checklist
-     * and activity.
-     */
 
     const details: TaskDetailsData = {
       id: task.id,
@@ -137,20 +126,12 @@ export default function TasksPage({ params }: TasksPageProps) {
       attachments: [],
 
       checklists: [],
-
-      activities: [],
     };
 
     setSelectedTask(details);
 
     setTaskDetailsOpen(true);
   }
-
-  /*
-   * ------------------------------------------------
-   * Search
-   * ------------------------------------------------
-   */
 
   const filteredTasks = tasks.filter((task) => {
     const value = search.trim().toLowerCase();
@@ -163,12 +144,6 @@ export default function TasksPage({ params }: TasksPageProps) {
     );
   });
 
-  /*
-   * ------------------------------------------------
-   * Loading
-   * ------------------------------------------------
-   */
-
   if (loading && tasks.length === 0) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -179,7 +154,6 @@ export default function TasksPage({ params }: TasksPageProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-2xl font-bold">Tasks</h1>
@@ -195,7 +169,6 @@ export default function TasksPage({ params }: TasksPageProps) {
         </Button>
       </div>
 
-      {/* Search */}
       <div className="flex items-center gap-3">
         <div className="relative max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -211,11 +184,8 @@ export default function TasksPage({ params }: TasksPageProps) {
         <Badge variant="secondary">{filteredTasks.length} tasks</Badge>
       </div>
 
-      {/* Task list */}
-      {/* Task list */}
       {filteredTasks.length > 0 ? (
         <div className="w-full">
-          {/* Desktop */}
           <div className="hidden overflow-hidden rounded-xl border lg:block">
             <div className="grid grid-cols-[90px_minmax(200px,1fr)_150px_160px_120px] border-b bg-muted/40 px-4 py-3 text-xs font-medium text-muted-foreground">
               <div>Key</div>
@@ -233,14 +203,12 @@ export default function TasksPage({ params }: TasksPageProps) {
                   onClick={() => handleTaskClick(task)}
                   className="grid w-full grid-cols-[90px_minmax(200px,1fr)_150px_160px_120px] items-center px-4 py-4 text-left transition-colors hover:bg-muted/40"
                 >
-                  {/* Key */}
                   <div>
                     <span className="font-mono text-xs text-muted-foreground">
                       {task.key}
                     </span>
                   </div>
 
-                  {/* Task */}
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{task.title}</p>
 
@@ -251,7 +219,6 @@ export default function TasksPage({ params }: TasksPageProps) {
                     )}
                   </div>
 
-                  {/* Status */}
                   <div className="flex items-center gap-2">
                     <span
                       className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -263,12 +230,10 @@ export default function TasksPage({ params }: TasksPageProps) {
                     <span className="truncate text-sm">{task.status.name}</span>
                   </div>
 
-                  {/* Assignee */}
                   <div className="truncate text-sm text-muted-foreground">
                     {task.assignee?.name || "Unassigned"}
                   </div>
 
-                  {/* Priority */}
                   <div>
                     <PriorityBadge priority={task.priority} />
                   </div>
@@ -277,7 +242,6 @@ export default function TasksPage({ params }: TasksPageProps) {
             </div>
           </div>
 
-          {/* Mobile */}
           <div className="space-y-3 lg:hidden">
             {filteredTasks.map((task) => (
               <button
@@ -286,7 +250,6 @@ export default function TasksPage({ params }: TasksPageProps) {
                 onClick={() => handleTaskClick(task)}
                 className="w-full rounded-xl border bg-background p-4 text-left shadow-sm transition-colors hover:bg-muted/40"
               >
-                {/* Top */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="mb-1">
@@ -303,16 +266,13 @@ export default function TasksPage({ params }: TasksPageProps) {
                   <PriorityBadge priority={task.priority} />
                 </div>
 
-                {/* Description */}
                 {task.description && (
                   <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
                     {task.description}
                   </p>
                 )}
 
-                {/* Bottom information */}
                 <div className="mt-4 flex flex-wrap items-center gap-3">
-                  {/* Status */}
                   <div className="flex items-center gap-2">
                     <span
                       className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -326,13 +286,11 @@ export default function TasksPage({ params }: TasksPageProps) {
                     </span>
                   </div>
 
-                  {/* Assignee */}
                   <span className="text-xs text-muted-foreground">
                     {task.assignee?.name || "Unassigned"}
                   </span>
                 </div>
 
-                {/* Labels */}
                 {task.labels && task.labels.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {task.labels.map((label) => (
@@ -365,7 +323,6 @@ export default function TasksPage({ params }: TasksPageProps) {
         </div>
       )}
 
-      {/* Task details */}
       <TaskDetailsDialog
         open={taskDetailsOpen}
         onOpenChange={setTaskDetailsOpen}
@@ -374,12 +331,6 @@ export default function TasksPage({ params }: TasksPageProps) {
     </div>
   );
 }
-
-/*
- * ------------------------------------------------
- * Priority Badge
- * ------------------------------------------------
- */
 
 function PriorityBadge({ priority }: { priority: TaskListItem["priority"] }) {
   const config = {

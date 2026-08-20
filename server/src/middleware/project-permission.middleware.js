@@ -50,7 +50,6 @@ export function requireProjectPermission(permission) {
         });
       }
 
-      // Make membership available to controller
       req.projectMembership = membership;
       req.projectRole = membership.role;
 

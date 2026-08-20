@@ -62,7 +62,6 @@ export default function TaskAttachments({
 
     if (!file) return;
 
-    // Reset input so the same file can be selected again
     event.target.value = "";
 
     if (file.size > MAX_FILE_SIZE) {
@@ -148,7 +147,6 @@ export default function TaskAttachments({
 
   return (
     <section className="space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Paperclip className="h-4 w-4 text-muted-foreground" />
@@ -195,7 +193,6 @@ export default function TaskAttachments({
 
       <Separator />
 
-      {/* Attachments */}
       {items.length > 0 ? (
         <div className="space-y-2">
           {items.map((attachment) => (
@@ -252,12 +249,10 @@ function AttachmentItem({
 }: AttachmentItemProps) {
   return (
     <div className="group flex items-center gap-3 rounded-lg border bg-background p-3 transition-colors hover:bg-muted/40">
-      {/* File icon */}
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
         <AttachmentIcon mimeType={attachment.mimeType} />
       </div>
 
-      {/* File information */}
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium" title={attachment.fileName}>
           {attachment.fileName}
@@ -280,7 +275,6 @@ function AttachmentItem({
         </div>
       </div>
 
-      {/* Actions */}
       <div className="flex shrink-0 items-center gap-1">
         <Button
           type="button"

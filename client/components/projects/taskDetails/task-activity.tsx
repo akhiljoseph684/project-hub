@@ -46,7 +46,6 @@ interface TaskActivityProps {
 export default function TaskActivity({ activities }: TaskActivityProps) {
   return (
     <section className="space-y-4">
-      {/* Header */}
       <div className="flex items-center gap-2">
         <Activity className="h-4 w-4 text-muted-foreground" />
 
@@ -94,17 +93,14 @@ interface ActivityItemProps {
 function ActivityItem({ activity, isLast }: ActivityItemProps) {
   return (
     <div className="relative flex gap-3">
-      {/* Timeline */}
       {!isLast && (
         <div className="absolute left-[15px] top-8 bottom-[-20px] w-px bg-border" />
       )}
 
-      {/* Activity icon */}
       <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border bg-background">
         <ActivityIcon type={activity.type} />
       </div>
 
-      {/* Activity content */}
       <div className="min-w-0 flex-1">
         <div className="flex items-start gap-2">
           {activity.user && (

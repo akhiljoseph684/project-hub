@@ -114,7 +114,6 @@ export default function CreateStatusDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Status Name */}
           <div className="space-y-2">
             <Label htmlFor="status-name">Status Name</Label>
 
@@ -129,7 +128,6 @@ export default function CreateStatusDialog({
             />
           </div>
 
-          {/* Status Color */}
           <div className="space-y-2">
             <Label htmlFor="status-color">Status Color</Label>
 
@@ -153,7 +151,6 @@ export default function CreateStatusDialog({
             </div>
           </div>
 
-          {/* Preview */}
           <div className="rounded-lg border bg-muted/30 p-4">
             <p className="mb-3 text-xs font-medium text-muted-foreground">
               Preview

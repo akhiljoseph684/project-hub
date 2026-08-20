@@ -104,7 +104,6 @@ export default function TaskChecklist({
 
   return (
     <section className="space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ListChecks className="h-4 w-4 text-muted-foreground" />
@@ -131,7 +130,6 @@ export default function TaskChecklist({
         )}
       </div>
 
-      {/* Progress */}
       {totalCount > 0 && (
         <div className="space-y-2">
           <div className="h-2 overflow-hidden rounded-full bg-muted">
@@ -149,7 +147,6 @@ export default function TaskChecklist({
 
       <Separator />
 
-      {/* Checklist items */}
       {items.length > 0 ? (
         <div className="space-y-2">
           {items.map((item) => (
@@ -202,7 +199,6 @@ export default function TaskChecklist({
         </div>
       )}
 
-      {/* Add checklist item */}
       {adding && (
         <div className="rounded-lg border bg-muted/30 p-3">
           <Input

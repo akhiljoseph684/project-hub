@@ -111,7 +111,6 @@ export default function TaskDetailsDialog({
     xl:max-w-7xl
   "
       >
-        {/* Fixed Header */}
         <DialogHeader
           className="
             shrink-0
@@ -151,7 +150,6 @@ export default function TaskDetailsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Scrollable Content */}
         <div className="min-h-0 flex-1 overflow-hidden">
           <ScrollArea className="h-full w-full">
             <div
@@ -162,22 +160,18 @@ export default function TaskDetailsDialog({
                 sm:p-6
               "
             >
-              {/* Task Details */}
               <TaskDetails task={task} />
 
-              {/* Checklist */}
               <TaskChecklist
                 taskId={task.id}
                 checklists={task.checklists ?? []}
               />
 
-              {/* Attachments */}
               <TaskAttachments
                 taskId={task.id}
                 attachments={task.attachments ?? []}
               />
 
-              {/* Comments */}
               <TaskComments taskId={task.id} comments={task.comments ?? []} />
             </div>
           </ScrollArea>

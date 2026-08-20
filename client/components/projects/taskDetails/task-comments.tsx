@@ -46,7 +46,6 @@ export default function TaskComments({
 }: TaskCommentsProps) {
   return (
     <section className="space-y-5">
-      {/* Header */}
       <div className="flex items-center gap-2">
         <MessageSquare className="h-4 w-4 text-muted-foreground" />
 
@@ -61,7 +60,6 @@ export default function TaskComments({
 
       <Separator />
 
-      {/* Existing comments */}
       {comments.length > 0 ? (
         <div className="space-y-5">
           {comments.map((comment) => (
@@ -85,7 +83,6 @@ export default function TaskComments({
         </div>
       )}
 
-      {/* New comment */}
       <TaskCommentForm taskId={taskId} onSuccess={onCommentCreated} />
     </section>
   );
@@ -101,7 +98,6 @@ interface CommentItemProps {
 function CommentItem({ comment, onUpdated, onDeleted }: CommentItemProps) {
   return (
     <div className="group flex gap-3">
-      {/* Avatar */}
       <Avatar className="h-9 w-9 shrink-0">
         <AvatarImage
           src={comment.user.avatar ?? undefined}
@@ -111,7 +107,6 @@ function CommentItem({ comment, onUpdated, onDeleted }: CommentItemProps) {
         <AvatarFallback>{getInitials(comment.user.name)}</AvatarFallback>
       </Avatar>
 
-      {/* Comment */}
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -122,7 +117,6 @@ function CommentItem({ comment, onUpdated, onDeleted }: CommentItemProps) {
             </p>
           </div>
 
-          {/* Actions */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

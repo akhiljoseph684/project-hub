@@ -94,10 +94,6 @@ export default function TaskCommentForm({
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
-    /*
-     * Ctrl + Enter / Cmd + Enter
-     * submits the comment.
-     */
     if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
 
@@ -108,7 +104,6 @@ export default function TaskCommentForm({
   return (
     <form onSubmit={handleSubmit} className="rounded-xl border bg-muted/20 p-4">
       <div className="flex gap-3">
-        {/* Current user avatar */}
         <Avatar className="h-9 w-9 shrink-0">
           <AvatarFallback>Y</AvatarFallback>
         </Avatar>

@@ -371,3 +371,219 @@ export async function getTasksByProject(projectId) {
     updatedAt: task.updatedAt,
   }));
 }
+
+export async function getTaskById(taskId) {
+  const task = await prisma.task.findUnique({
+    where: {
+      id: taskId,
+    },
+
+    include: {
+      status: {
+        select: {
+          id: true,
+          name: true,
+          color: true,
+        },
+      },
+
+      assignee: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
+        },
+      },
+
+      reporter: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
+        },
+      },
+
+      labels: {
+        include: {
+          label: {
+            select: {
+              id: true,
+              name: true,
+              color: true,
+            },
+          },
+        },
+      },
+
+      comments: {
+        orderBy: {
+          createdAt: "asc",
+        },
+
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatar: true,
+            },
+          },
+        },
+      },
+
+      attachments: {
+        orderBy: {
+          createdAt: "desc",
+        },
+
+        include: {
+          uploadedBy: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatar: true,
+            },
+          },
+        },
+      },
+
+      checklists: {
+        orderBy: {
+          position: "asc",
+        },
+      },
+    },
+  });
+
+  if (!task) {
+    throw new Error("Task not found");
+  }
+
+  return {
+    id: task.id,
+
+    key: task.key,
+
+    title: task.title,
+
+    description: task.description,
+
+    priority: task.priority,
+
+    dueDate: task.dueDate,
+
+    position: task.position,
+
+    createdAt: task.createdAt,
+
+    updatedAt: task.updatedAt,
+
+    status: {
+      id: task.status.id,
+      name: task.status.name,
+      color: task.status.color,
+    },
+
+    assignee: task.assignee
+      ? {
+          id: task.assignee.id,
+
+          name: [
+            task.assignee.firstName,
+            task.assignee.lastName,
+          ]
+            .filter(Boolean)
+            .join(" "),
+
+          avatar: task.assignee.avatar,
+        }
+      : null,
+
+    reporter: task.reporter
+      ? {
+          id: task.reporter.id,
+
+          name: [
+            task.reporter.firstName,
+            task.reporter.lastName,
+          ]
+            .filter(Boolean)
+            .join(" "),
+
+          avatar: task.reporter.avatar,
+        }
+      : null,
+
+    labels: task.labels.map((item) => ({
+      id: item.label.id,
+      name: item.label.name,
+      color: item.label.color,
+    })),
+
+    comments: task.comments.map((comment) => ({
+      id: comment.id,
+
+      content: comment.content,
+
+      createdAt: comment.createdAt,
+
+      user: {
+        id: comment.user.id,
+
+        name: [
+          comment.user.firstName,
+          comment.user.lastName,
+        ]
+          .filter(Boolean)
+          .join(" "),
+
+        avatar: comment.user.avatar,
+      },
+    })),
+
+    attachments: task.attachments.map(
+      (attachment) => ({
+        id: attachment.id,
+
+        fileName: attachment.fileName,
+
+        fileUrl: attachment.fileUrl,
+
+        mimeType: attachment.mimeType,
+
+        size: attachment.size,
+
+        createdAt: attachment.createdAt,
+
+        uploadedBy: {
+          id: attachment.uploadedBy.id,
+
+          name: [
+            attachment.uploadedBy.firstName,
+            attachment.uploadedBy.lastName,
+          ]
+            .filter(Boolean)
+            .join(" "),
+
+          avatar: attachment.uploadedBy.avatar,
+        },
+      }),
+    ),
+
+    checklists: task.checklists.map(
+      (checklist) => ({
+        id: checklist.id,
+
+        title: checklist.title,
+
+        isCompleted: checklist.isCompleted,
+
+        position: checklist.position,
+      }),
+    ),
+  };
+}

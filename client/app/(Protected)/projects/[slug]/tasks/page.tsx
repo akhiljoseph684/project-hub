@@ -13,7 +13,7 @@ import TaskDetailsDialog, {
 
 import { showErrorToast } from "@/lib/toast";
 import { useAppSelector } from "@/redux/hooks";
-import { getTasksByProject } from "@/services/task.service";
+import { getTaskById, getTasksByProject } from "@/services/task.service";
 
 interface TaskListItem {
   id: string;
@@ -64,9 +64,7 @@ export default function TasksPage({ params }: TasksPageProps) {
 
   const [tasks, setTasks] = useState<TaskListItem[]>([]);
 
-  const [selectedTask, setSelectedTask] = useState<TaskDetailsData | null>(
-    null,
-  );
+  const [selectedTask, setSelectedTask] = useState<TaskDetailsData | null>(null);
 
   const [taskDetailsOpen, setTaskDetailsOpen] = useState(false);
 
@@ -101,36 +99,19 @@ export default function TasksPage({ params }: TasksPageProps) {
   }
 
   async function handleTaskClick(task: TaskListItem) {
-
-    const details: TaskDetailsData = {
-      id: task.id,
-
-      key: task.key,
-
-      title: task.title,
-
-      description: task.description,
-
-      priority: task.priority,
-
-      status: task.status,
-
-      assignee: task.assignee,
-
-      dueDate: task.dueDate,
-
-      labels: task.labels ?? [],
-
-      comments: [],
-
-      attachments: [],
-
-      checklists: [],
-    };
-
-    setSelectedTask(details);
-
-    setTaskDetailsOpen(true);
+    if (!task) return null;
+      try{
+        setLoading(true)
+  
+        const res = await getTaskById(task.id)
+  
+        setSelectedTask(res.task);
+        setTaskDetailsOpen(true);
+      }catch(error: any){
+        showErrorToast(error?.messgage)
+      }finally{
+        setLoading(false)
+      }
   }
 
   const filteredTasks = tasks.filter((task) => {

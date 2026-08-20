@@ -50,3 +50,56 @@ export async function getTasksByProject(projectId: string) {
     );
   }
 }
+
+export async function uploadTaskAttachment(taskId: string, file: File) {
+  try {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    const res = await api.post(`/task/${taskId}/attachments`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+}
+
+export async function deleteTaskAttachment(attachmentId: string) {
+  try {
+    const res = await api.delete(`task/attachments/${attachmentId}`);
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+}
+
+export async function getTaskById(taskId: string) {
+  try {
+    const res = await api.get(`/task/${taskId}`);
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+}

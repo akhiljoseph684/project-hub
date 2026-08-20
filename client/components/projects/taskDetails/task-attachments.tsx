@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
+import { deleteTaskAttachment, uploadTaskAttachment } from "@/services/task.service";
 
 interface TaskAttachment {
   id: string;
@@ -73,23 +74,9 @@ export default function TaskAttachments({
     try {
       setUploading(true);
 
-      /*
-       * TODO:
-       *
-       * Connect this to your backend.
-       *
-       * Example:
-       *
-       * const response = await uploadTaskAttachment(
-       *   taskId,
-       *   file,
-       * );
-       *
-       * setItems((prev) => [
-       *   ...prev,
-       *   response.attachment,
-       * ]);
-       */
+      const response = await uploadTaskAttachment(taskId, file);
+
+      setItems((prev) => [...prev, response.attachment]);
 
       console.log("Upload attachment:", taskId, file);
 
@@ -111,19 +98,9 @@ export default function TaskAttachments({
     try {
       setDeletingId(attachment.id);
 
-      /*
-       * TODO:
-       *
-       * Connect this to your backend.
-       *
-       * Example:
-       *
-       * await deleteTaskAttachment(
-       *   attachment.id,
-       * );
-       */
-
-      console.log("Delete attachment:", attachment.id);
+      await deleteTaskAttachment(
+         attachment.id,
+       );
 
       setItems((prev) => prev.filter((item) => item.id !== attachment.id));
 

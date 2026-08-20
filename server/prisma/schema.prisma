@@ -415,10 +415,11 @@ model TaskAttachment {
   taskId       String
   uploadedById String
 
-  fileName String
-  fileUrl  String
-  mimeType String?
-  size     Int?
+  fileName   String
+  fileUrl    String
+  storageKey String?
+  mimeType   String?
+  size       Int?
 
   createdAt DateTime @default(now())
 

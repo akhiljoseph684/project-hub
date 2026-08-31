@@ -34,15 +34,11 @@ export default function SprintPage() {
 
   const [processingSprint, setProcessingSprint] = useState(false);
 
-  // Form states
   const [name, setName] = useState("");
   const [goal, setGoal] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  /**
-   * Load all project sprints
-   */
   const loadSprints = async () => {
     if (!projectId) return;
 
@@ -61,18 +57,12 @@ export default function SprintPage() {
     }
   };
 
-  /**
-   * Load sprints when project is available
-   */
   useEffect(() => {
     if (projectId) {
       loadSprints();
     }
   }, [projectId]);
 
-  /**
-   * Create Sprint
-   */
   const handleCreateSprint = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -119,9 +109,6 @@ export default function SprintPage() {
     }
   };
 
-  /**
-   * Open Sprint Details
-   */
   const handleOpenSprint = async (sprintId: string) => {
     try {
       setLoadingSprint(true);
@@ -141,17 +128,11 @@ export default function SprintPage() {
     }
   };
 
-  /**
-   * Close Sprint Details
-   */
   const handleCloseSprint = () => {
     setShowSprintDialog(false);
     setSelectedSprint(null);
   };
 
-  /**
-   * Start Sprint
-   */
   const handleStartSprint = async (sprintId: string) => {
     try {
       setProcessingSprint(true);
@@ -175,9 +156,6 @@ export default function SprintPage() {
     }
   };
 
-  /**
-   * Complete Sprint
-   */
   const handleCompleteSprint = async (sprintId: string) => {
     try {
       setProcessingSprint(true);
@@ -201,9 +179,6 @@ export default function SprintPage() {
     }
   };
 
-  /**
-   * Project not loaded
-   */
   if (!project) {
     return (
       <div className="p-6">
@@ -216,9 +191,6 @@ export default function SprintPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* ========================================
-          HEADER
-      ======================================== */}
 
       <div className="flex items-center justify-between">
         <div>
@@ -238,16 +210,11 @@ export default function SprintPage() {
         </button>
       </div>
 
-      {/* ========================================
-          CREATE SPRINT FORM
-      ======================================== */}
-
       {showCreateForm && (
         <div className="rounded-lg border bg-card p-6">
           <h2 className="mb-4 text-lg font-semibold">Create Sprint</h2>
 
           <form onSubmit={handleCreateSprint} className="space-y-4">
-            {/* Sprint Name */}
 
             <div>
               <label className="mb-1 block text-sm font-medium">
@@ -264,8 +231,6 @@ export default function SprintPage() {
               />
             </div>
 
-            {/* Sprint Goal */}
-
             <div>
               <label className="mb-1 block text-sm font-medium">
                 Sprint Goal
@@ -279,8 +244,6 @@ export default function SprintPage() {
                 rows={3}
               />
             </div>
-
-            {/* Dates */}
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
@@ -310,8 +273,6 @@ export default function SprintPage() {
               </div>
             </div>
 
-            {/* Form Buttons */}
-
             <div className="flex justify-end gap-2">
               <button
                 type="button"
@@ -334,19 +295,11 @@ export default function SprintPage() {
         </div>
       )}
 
-      {/* ========================================
-          LOADING
-      ======================================== */}
-
       {loading && (
         <div className="py-10 text-center text-muted-foreground">
           Loading sprints...
         </div>
       )}
-
-      {/* ========================================
-          EMPTY STATE
-      ======================================== */}
 
       {!loading && sprints.length === 0 && (
         <div className="rounded-lg border border-dashed p-10 text-center">
@@ -399,48 +352,10 @@ export default function SprintPage() {
                   </span>
                 )}
               </div>
-
-              {/* Sprint Actions */}
-
-              {/* <div className="mt-5 flex justify-end gap-2">
-                {sprint.status === "PLANNED" && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-
-                      handleStartSprint(sprint.id);
-                    }}
-                    disabled={processingSprint}
-                    className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-                  >
-                    {processingSprint ? "Starting..." : "Start Sprint"}
-                  </button>
-                )}
-
-                {sprint.status === "ACTIVE" && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-
-                      handleCompleteSprint(sprint.id);
-                    }}
-                    disabled={processingSprint}
-                    className="rounded-md border px-4 py-2 text-sm font-medium disabled:opacity-50"
-                  >
-                    {processingSprint ? "Completing..." : "Complete Sprint"}
-                  </button>
-                )}
-              </div> */}
             </div>
           ))}
         </div>
       )}
-
-      {/* ========================================
-          SPRINT DETAILS DIALOG
-      ======================================== */}
 
       {showSprintDialog && (
         <div
@@ -451,7 +366,6 @@ export default function SprintPage() {
             className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-background p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Dialog Loading */}
 
             {loadingSprint && (
               <div className="py-10 text-center">
@@ -461,11 +375,8 @@ export default function SprintPage() {
               </div>
             )}
 
-            {/* Dialog Content */}
-
             {!loadingSprint && selectedSprint && (
               <>
-                {/* Header */}
 
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -488,8 +399,6 @@ export default function SprintPage() {
                     ✕
                   </button>
                 </div>
-
-                {/* Sprint Information */}
 
                 <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
                   <div className="rounded-lg border p-3">
@@ -532,8 +441,6 @@ export default function SprintPage() {
                     </p>
                   </div>
                 </div>
-
-                {/* Sprint Tasks */}
 
                 <div className="mt-6">
                   <div className="mb-3 flex items-center justify-between">
@@ -581,8 +488,6 @@ export default function SprintPage() {
                     </div>
                   )}
                 </div>
-
-                {/* Dialog Actions */}
 
                 <div className="mt-6 flex justify-end gap-2">
                   {selectedSprint.status === "PLANNED" && (

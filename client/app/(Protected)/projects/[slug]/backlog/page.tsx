@@ -52,13 +52,6 @@ export default function BacklogPage() {
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
 
-  /**
-   * Load backlog tasks
-   *
-   * IMPORTANT:
-   * Replace this URL with your existing task-list API
-   * if your project uses a different endpoint.
-   */
   const loadBacklog = async () => {
     try {
       setLoading(true);
@@ -181,7 +174,6 @@ export default function BacklogPage() {
           )}
         </div>
 
-        {/* Sprint Assignment */}
         <div className="flex flex-col gap-2 sm:flex-row">
           <select
             value={selectedSprintId}
@@ -229,7 +221,6 @@ export default function BacklogPage() {
         </div>
       </div>
 
-      {/* No Sprints */}
       {!loading && sprints.length === 0 && (
         <div className="rounded-lg border border-dashed p-6 text-center">
           <p className="text-sm text-muted-foreground">
@@ -242,7 +233,6 @@ export default function BacklogPage() {
         </div>
       )}
 
-      {/* Loading */}
       {loading && (
         <div className="rounded-lg border p-10 text-center">
           <p className="text-sm text-muted-foreground">
@@ -251,7 +241,6 @@ export default function BacklogPage() {
         </div>
       )}
 
-      {/* Empty Backlog */}
       {!loading && tasks.length === 0 && (
         <div className="rounded-lg border border-dashed p-10 text-center">
           <h2 className="text-lg font-medium">
@@ -264,7 +253,6 @@ export default function BacklogPage() {
         </div>
       )}
 
-      {/* Backlog Tasks */}
       {!loading && tasks.length > 0 && (
         <div className="overflow-hidden rounded-lg border">
           <div className="divide-y">
@@ -281,7 +269,6 @@ export default function BacklogPage() {
                       : "bg-background"
                   }`}
                 >
-                  {/* Checkbox */}
                   <input
                     type="checkbox"
                     checked={selected}
@@ -290,14 +277,12 @@ export default function BacklogPage() {
                     }
                   />
 
-                  {/* Task Key */}
                   <div className="w-24 shrink-0">
                     <span className="text-sm font-medium">
                       {task.key}
                     </span>
                   </div>
 
-                  {/* Task Details */}
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate text-sm font-medium">
                       {task.title}
@@ -310,21 +295,18 @@ export default function BacklogPage() {
                     )}
                   </div>
 
-                  {/* Type */}
                   {task.type && (
                     <span className="hidden rounded-md bg-muted px-2 py-1 text-xs md:inline-block">
                       {task.type}
                     </span>
                   )}
 
-                  {/* Priority */}
                   {task.priority && (
                     <span className="hidden text-xs text-muted-foreground sm:inline-block">
                       {task.priority}
                     </span>
                   )}
 
-                  {/* Status */}
                   {task.status && (
                     <span className="rounded-full bg-muted px-2 py-1 text-xs">
                       {task.status.name}

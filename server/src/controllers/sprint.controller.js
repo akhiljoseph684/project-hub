@@ -8,10 +8,6 @@ import {
   deleteSprint,
 } from "../services/sprint.service.js";
 
-/**
- * Create Sprint
- * POST /projects/:projectId/sprints
- */
 export const createSprintController = async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -53,11 +49,6 @@ export const getProjectSprintsController = async (req, res) => {
   }
 };
 
-
-/**
- * Get Sprint
- * GET /sprints/:sprintId
- */
 export const getSprintByIdController = async (req, res) => {
   try {
     const { sprintId } = req.params;
@@ -78,11 +69,6 @@ export const getSprintByIdController = async (req, res) => {
   }
 };
 
-
-/**
- * Update Sprint
- * PATCH /sprints/:sprintId
- */
 export const updateSprintController = async (req, res) => {
   try {
     const { sprintId } = req.params;
@@ -104,11 +90,6 @@ export const updateSprintController = async (req, res) => {
   }
 };
 
-
-/**
- * Start Sprint
- * POST /sprints/:sprintId/start
- */
 export const startSprintController = async (req, res) => {
   try {
     const { sprintId } = req.params;
@@ -130,11 +111,6 @@ export const startSprintController = async (req, res) => {
   }
 };
 
-
-/**
- * Complete Sprint
- * POST /sprints/:sprintId/complete
- */
 export const completeSprintController = async (req, res) => {
   try {
     const { sprintId } = req.params;
@@ -156,11 +132,6 @@ export const completeSprintController = async (req, res) => {
   }
 };
 
-
-/**
- * Delete Sprint
- * DELETE /sprints/:sprintId
- */
 export const deleteSprintController = async (req, res) => {
   try {
     const { sprintId } = req.params;

@@ -41,10 +41,7 @@ export default function TaskChecklist({
       ),
     );
 
-    // TODO:
-    // PATCH /checklists/:checklistId
-    //
-    // Example:
+    
     // updateChecklist(id, {
     //   isCompleted: !item.isCompleted,
     // });
@@ -53,7 +50,6 @@ export default function TaskChecklist({
   function handleDelete(id: string) {
     setItems((prev) => prev.filter((item) => item.id !== id));
 
-    // TODO:
     // DELETE /checklists/:checklistId
   }
 
@@ -74,8 +70,6 @@ export default function TaskChecklist({
     setNewItem("");
     setAdding(false);
 
-    // TODO:
-    // POST /tasks/:taskId/checklists
     //
     // createChecklist(taskId, {
     //   title,

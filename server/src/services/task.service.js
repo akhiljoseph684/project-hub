@@ -155,7 +155,7 @@ const formatBoardTask = (task) => {
   };
 };
 
-export const getProjectBoard = async ({ projectId, userId }) => {
+export const getProjectBoard = async ({ projectId, userId, filters = {} }) => {
   const member = await prisma.projectMember.findUnique({
     where: {
       projectId_userId: {
@@ -169,6 +169,49 @@ export const getProjectBoard = async ({ projectId, userId }) => {
     throw new Error("You are not a member of this project.");
   }
 
+  const { search, priority, assignedToMe, statusId } = filters;
+
+  const taskWhere = {};
+
+  if (search?.trim()) {
+    taskWhere.OR = [
+      {
+        title: {
+          contains: search.trim(),
+          mode: "insensitive",
+        },
+      },
+      {
+        key: {
+          contains: search.trim(),
+          mode: "insensitive",
+        },
+      },
+      {
+        description: {
+          contains: search.trim(),
+          mode: "insensitive",
+        },
+      },
+    ];
+  }
+
+  if (
+    priority &&
+    ["LOW", "MEDIUM", "HIGH", "URGENT"].includes(priority.toUpperCase())
+  ) {
+    taskWhere.priority = priority.toUpperCase();
+  }
+
+  console.log(filters);
+  if (assignedToMe) {
+    taskWhere.assigneeId = userId;
+  }
+
+  if (statusId) {
+    taskWhere.statusId = statusId;
+  }
+
   const statuses = await prisma.taskStatus.findMany({
     where: {
       projectId,
@@ -180,6 +223,8 @@ export const getProjectBoard = async ({ projectId, userId }) => {
 
     include: {
       tasks: {
+        where: taskWhere,
+
         orderBy: {
           position: "asc",
         },
@@ -194,7 +239,11 @@ export const getProjectBoard = async ({ projectId, userId }) => {
             },
           },
 
-          labels: true,
+          labels: {
+            include: {
+              label: true,
+            },
+          },
 
           checklists: true,
 
@@ -492,10 +541,7 @@ export async function getTaskById(taskId) {
       ? {
           id: task.assignee.id,
 
-          name: [
-            task.assignee.firstName,
-            task.assignee.lastName,
-          ]
+          name: [task.assignee.firstName, task.assignee.lastName]
             .filter(Boolean)
             .join(" "),
 
@@ -507,10 +553,7 @@ export async function getTaskById(taskId) {
       ? {
           id: task.reporter.id,
 
-          name: [
-            task.reporter.firstName,
-            task.reporter.lastName,
-          ]
+          name: [task.reporter.firstName, task.reporter.lastName]
             .filter(Boolean)
             .join(" "),
 
@@ -534,10 +577,7 @@ export async function getTaskById(taskId) {
       user: {
         id: comment.user.id,
 
-        name: [
-          comment.user.firstName,
-          comment.user.lastName,
-        ]
+        name: [comment.user.firstName, comment.user.lastName]
           .filter(Boolean)
           .join(" "),
 
@@ -545,45 +585,196 @@ export async function getTaskById(taskId) {
       },
     })),
 
-    attachments: task.attachments.map(
-      (attachment) => ({
-        id: attachment.id,
+    attachments: task.attachments.map((attachment) => ({
+      id: attachment.id,
 
-        fileName: attachment.fileName,
+      fileName: attachment.fileName,
 
-        fileUrl: attachment.fileUrl,
+      fileUrl: attachment.fileUrl,
 
-        mimeType: attachment.mimeType,
+      mimeType: attachment.mimeType,
 
-        size: attachment.size,
+      size: attachment.size,
 
-        createdAt: attachment.createdAt,
+      createdAt: attachment.createdAt,
 
-        uploadedBy: {
-          id: attachment.uploadedBy.id,
+      uploadedBy: {
+        id: attachment.uploadedBy.id,
 
-          name: [
-            attachment.uploadedBy.firstName,
-            attachment.uploadedBy.lastName,
-          ]
-            .filter(Boolean)
-            .join(" "),
+        name: [attachment.uploadedBy.firstName, attachment.uploadedBy.lastName]
+          .filter(Boolean)
+          .join(" "),
 
-          avatar: attachment.uploadedBy.avatar,
-        },
-      }),
-    ),
+        avatar: attachment.uploadedBy.avatar,
+      },
+    })),
 
-    checklists: task.checklists.map(
-      (checklist) => ({
-        id: checklist.id,
+    checklists: task.checklists.map((checklist) => ({
+      id: checklist.id,
 
-        title: checklist.title,
+      title: checklist.title,
 
-        isCompleted: checklist.isCompleted,
+      isCompleted: checklist.isCompleted,
 
-        position: checklist.position,
-      }),
-    ),
+      position: checklist.position,
+    })),
   };
 }
+
+export const assignTaskToSprint = async ({ taskId, sprintId, projectId }) => {
+  const task = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      projectId,
+    },
+  });
+
+  if (!task) {
+    throw new Error("Task not found.");
+  }
+
+  const sprint = await prisma.sprint.findFirst({
+    where: {
+      id: sprintId,
+      projectId,
+    },
+  });
+
+  if (!sprint) {
+    throw new Error("Sprint not found.");
+  }
+
+  if (sprint.status === "COMPLETED") {
+    throw new Error("Cannot add tasks to a completed sprint.");
+  }
+
+  if (task.sprintId && task.sprintId !== sprintId) {
+    throw new Error("Task already belongs to another sprint.");
+  }
+
+  const updatedTask = await prisma.task.update({
+    where: {
+      id: taskId,
+    },
+
+    data: {
+      sprintId,
+    },
+
+    include: {
+      status: true,
+
+      sprint: true,
+
+      assignee: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
+        },
+      },
+
+      labels: true,
+
+      _count: {
+        select: {
+          comments: true,
+          attachments: true,
+          checklists: true,
+        },
+      },
+
+      checklists: true,
+    },
+  });
+
+  return updatedTask;
+};
+
+export const removeTaskFromSprint = async ({ taskId, projectId }) => {
+  const task = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      projectId,
+    },
+  });
+
+  if (!task) {
+    throw new Error("Task not found.");
+  }
+
+  if (!task.sprintId) {
+    throw new Error("Task is not assigned to a sprint.");
+  }
+
+  const updatedTask = await prisma.task.update({
+    where: {
+      id: taskId,
+    },
+
+    data: {
+      sprintId: null,
+    },
+
+    include: {
+      status: true,
+      sprint: true,
+    },
+  });
+
+  return updatedTask;
+};
+
+export const getBacklogTasks = async ({ projectId, userId }) => {
+  const member = await prisma.projectMember.findUnique({
+    where: {
+      projectId_userId: {
+        projectId,
+        userId,
+      },
+    },
+  });
+
+  if (!member) {
+    throw new Error("You are not a member of this project.");
+  }
+
+  const tasks = await prisma.task.findMany({
+    where: {
+      projectId,
+      sprintId: null,
+    },
+
+    include: {
+      status: true,
+
+      assignee: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
+        },
+      },
+
+      labels: true,
+
+      _count: {
+        select: {
+          comments: true,
+          attachments: true,
+          checklists: true,
+        },
+      },
+
+      checklists: true,
+    },
+
+    orderBy: {
+      position: "asc",
+    },
+  });
+
+  return tasks.map(formatBoardTask);
+};

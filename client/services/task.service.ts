@@ -103,3 +103,57 @@ export async function getTaskById(taskId: string) {
     );
   }
 }
+
+export const assignTaskToSprint = async (
+  projectId: string,
+  taskId: string,
+  sprintId: string,
+) => {
+  try {
+    const res = await api.patch(`/task/${projectId}/${taskId}/sprint`, {
+      sprintId,
+    });
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const removeTaskFromSprint = async (
+  projectId: string,
+  taskId: string,
+) => {
+  try {
+    const res = await api.delete(`/tasks/${projectId}/${taskId}/sprint`);
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export async function getBacklogTasks(projectId: string) {
+  try {
+    const res = await api.get(`/task/projects/${projectId}/backlog`);
+
+    return res.data;
+  } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+}

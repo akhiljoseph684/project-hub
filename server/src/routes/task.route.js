@@ -2,10 +2,13 @@ import express from "express";
 
 import { verifyUser } from "../middleware/auth.middleware.js";
 import {
+  assignTaskToSprintController,
   createTaskController,
   deleteTaskAttachmentController,
+  getBacklogTasksController,
   getTaskByIdController,
   getTasksByProjectController,
+  removeTaskFromSprintController,
   updateTaskStatusController,
   uploadTaskAttachmentController,
 } from "../controllers/task.controller.js";
@@ -37,11 +40,29 @@ router.post(
 );
 
 router.delete(
-    "/attachments/:attachmentId",
-    verifyUser,
-    deleteTaskAttachmentController,
+  "/attachments/:attachmentId",
+  verifyUser,
+  deleteTaskAttachmentController,
 );
 
 router.get("/:taskId", verifyUser, getTaskByIdController);
+
+router.patch(
+  "/:projectId/:taskId/sprint",
+  verifyUser,
+  assignTaskToSprintController,
+);
+
+router.delete(
+  "/:projectId/:taskId/sprint",
+  verifyUser,
+  removeTaskFromSprintController,
+);
+
+router.get(
+  "/projects/:projectId/backlog",
+  verifyUser,
+  getBacklogTasksController,
+);
 
 export default router;

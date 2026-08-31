@@ -18,6 +18,8 @@ import { getProjectLabels } from "@/services/label.service";
 import CreateStatusDialog from "@/components/projects/board/create-status-dialog";
 import DeleteStatusDialog from "@/components/projects/board/delete-status-dialog";
 import { Loader2 } from "lucide-react";
+import { useQueryParams } from "@/hooks/use-query-params";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface BoardMember {
   id: string;
@@ -59,6 +61,16 @@ export default function BoardPage() {
 
   const [deleteStatusOpen, setDeleteStatusOpen] = useState(false);
 
+  const [priority, setPriority] = useState("all");
+
+  const [assignee, setAssignee] = useState("all");
+
+  const [search, setSearch] = useState("");
+
+  const debouncedSearch = useDebounce(search, 500);
+
+  const { createQueryString } = useQueryParams();
+
   const [selectedStatus, setSelectedStatus] = useState<{
     id: string;
     name: string;
@@ -75,7 +87,13 @@ export default function BoardPage() {
     try {
       setLoading(true);
 
-      const res = await getProjectBoard(project.id);
+      const query = createQueryString({
+        search: debouncedSearch,
+        assignee: assignee !== "all" ? assignee : undefined,
+        priority: priority !== "all" ? priority : undefined,
+      });
+      
+      const res = await getProjectBoard(project.id, query);
 
       setColumns(res.board);
 
@@ -89,11 +107,11 @@ export default function BoardPage() {
     } catch (error: any) {
       console.error("Fetch Board Error:", error);
 
-      showErrorToast(error.message || "Failed to load project board.");
+      showErrorToast(error?.message || "Failed to load project board.");
     } finally {
       setLoading(false);
     }
-  }, [project?.id]);
+  }, [project?.id, debouncedSearch, assignee, priority, createQueryString]);
 
   const fetchMembers = useCallback(async () => {
     if (!project?.id) return;
@@ -136,9 +154,14 @@ export default function BoardPage() {
     if (!project?.id) return;
 
     fetchBoard();
+  }, [project?.id, fetchBoard]);
+
+  useEffect(() => {
+    if (!project?.id) return;
+
     fetchMembers();
     fetchLabels();
-  }, [project?.id, fetchBoard, fetchMembers, fetchLabels]);
+  }, [project?.id, fetchMembers, fetchLabels]);
 
   if (!project) {
     return null;
@@ -147,14 +170,26 @@ export default function BoardPage() {
   return (
     <div className="space-y-6">
       <BoardToolbar
-        search=""
-        assignee="all"
-        priority="all"
-        onSearchChange={() => {}}
-        onAssigneeChange={() => {}}
-        onPriorityChange={() => {}}
-        onResetFilters={() => {}}
-        onCreateTask={() => setDialogOpen(true)}
+        search={search}
+        assignee={assignee}
+        priority={priority}
+        onSearchChange={(value) => {
+          setSearch(value);
+        }}
+        onAssigneeChange={(value) => {
+          setAssignee(value);
+        }}
+        onPriorityChange={(value) => {
+          setPriority(value);
+        }}
+        onResetFilters={() => {
+          setSearch("");
+          setAssignee("all");
+          setPriority("all");
+        }}
+        onCreateTask={() => {
+          setDialogOpen(true);
+        }}
       />
 
       {loading ? (
@@ -211,7 +246,7 @@ export default function BoardPage() {
         onOpenChange={setDeleteStatusOpen}
         status={selectedStatus}
         onSuccess={(statusId: any) => {
-          fetchBoard()
+          fetchBoard();
 
           setSelectedStatus(null);
         }}

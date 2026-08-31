@@ -13,6 +13,7 @@ import userRoutes from "./src/routes/user.route.js";
 import labelRoutes from "./src/routes/label.route.js";
 import taskRoutes from "./src/routes/task.route.js";
 import statusRoutes from "./src/routes/status.route.js";
+import sprintRoutes from "./src/routes/sprint.routes.js";
 
 import http from "http";
 import { initializeSocket } from "./socket/index.js";
@@ -54,6 +55,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/labels", labelRoutes);
 app.use("/api/task", taskRoutes);
 app.use("/api/status", statusRoutes);
+app.use("/api/sprints", sprintRoutes);
 
 app.use(errorHandler);
 

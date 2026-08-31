@@ -38,32 +38,21 @@ export default function TaskCommentForm({
       setLoading(true);
 
       /*
-       * TODO:
-       *
-       * Connect your backend service here.
-       *
-       * Example:
-       *
-       * const response = await createTaskComment(
-       *   taskId,
-       *   {
-       *     content: trimmedContent,
-       *   },
-       * );
-       *
-       * onSuccess?.(response.comment);
+      const response = await createTaskComment(
+         taskId,
+         {
+           content: trimmedContent,
+         },
+       );
+      
+       onSuccess?.(response.comment);
        */
 
       console.log("Create comment:", {
         taskId,
         content: trimmedContent,
       });
-
-      /*
-       * Temporary comment for UI testing.
-       *
-       * Remove this when the backend API is connected.
-       */
+      
       const temporaryComment: TaskComment = {
         id: `temp-${Date.now()}`,
         content: trimmedContent,

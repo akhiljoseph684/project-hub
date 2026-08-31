@@ -119,6 +119,7 @@ export default function TaskAttachments({
   }
 
   function handleDownload(attachment: TaskAttachment) {
+    console.log((attachment))
     window.open(attachment.fileUrl, "_blank", "noopener,noreferrer");
   }
 

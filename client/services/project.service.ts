@@ -372,11 +372,9 @@ export const getMyProjectInvitations = async (
   }
 };
 
-
-
-export const getProjectBoard = async (projectId: string) => {
+export const getProjectBoard = async (projectId: string, query: string) => {
   try {
-    const res = await api.get(`/projects/${projectId}/board`);
+    const res = await api.get(`/projects/${projectId}/board${query}`);
 
     return res.data;
   } catch (error: any) {

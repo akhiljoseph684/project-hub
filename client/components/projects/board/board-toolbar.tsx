@@ -104,10 +104,10 @@ export default function BoardToolbar({
             <RotateCcw className="h-4 w-4" />
           </Button>
 
-          <Button variant="outline">
+          {/* <Button variant="outline">
             <Filter className="mr-2 h-4 w-4" />
             Filters
-          </Button>
+          </Button> */}
 
           <Button onClick={onCreateTask}>
             <Plus className="mr-2 h-4 w-4" />

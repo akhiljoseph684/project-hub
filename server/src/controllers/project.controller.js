@@ -341,20 +341,39 @@ export const getMyProjectInvitationsController = async (req, res, next) => {
   }
 };
 
-export const getProjectBoardController = async (req, res, next) => {
+export const getProjectBoardController = async (req, res) => {
   try {
     const { projectId } = req.params;
 
+    const { search, priority, assignee, statusId } = req.query;
     const board = await taskService.getProjectBoard({
       projectId,
+
       userId: req.user.id,
+
+      filters: {
+        search,
+
+        priority,
+
+        assignedToMe: assignee ? true : false,
+
+        statusId,
+      },
     });
 
     return res.status(200).json({
       success: true,
+
       board,
     });
   } catch (error) {
-    next(error);
+    console.error("Get project board error:", error);
+
+    return res.status(500).json({
+      success: false,
+
+      message: error.message || "Failed to fetch project board",
+    });
   }
 };

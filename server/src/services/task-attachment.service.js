@@ -109,8 +109,16 @@ export async function deleteTaskAttachment({ attachmentId, userId }) {
   }
 
   if (attachment.storageKey) {
+    let resourceType = "raw";
+
+    if (attachment.mimeType?.startsWith("image/")) {
+      resourceType = "image";
+    } else if (attachment.mimeType?.startsWith("video/")) {
+      resourceType = "video";
+    }
+
     await cloudinary.uploader.destroy(attachment.storageKey, {
-      resource_type: "auto",
+      resource_type: resourceType,
     });
   }
 

@@ -96,7 +96,6 @@ export default function SprintPage() {
         endDate: endDate || undefined,
       });
 
-      // Reset form
       setName("");
       setGoal("");
       setStartDate("");
@@ -146,7 +145,6 @@ export default function SprintPage() {
 
       await loadSprints();
 
-      // Refresh currently opened sprint
       if (selectedSprint && selectedSprint.id === sprintId) {
         const response = await getSprintById(sprintId);
 
@@ -169,7 +167,6 @@ export default function SprintPage() {
 
       await loadSprints();
 
-      // Refresh currently opened sprint
       if (selectedSprint && selectedSprint.id === sprintId) {
         const response = await getSprintById(sprintId);
 

@@ -347,7 +347,6 @@ export default function CalendarPage() {
             className="w-full max-w-md rounded-xl bg-background p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
 
             <div className="flex items-start justify-between">
               <div>
@@ -382,7 +381,6 @@ export default function CalendarPage() {
               </p>
             </div>
 
-            {/* Task Details */}
 
             {selectedEvent.task && (
               <div className="mt-4 space-y-3">
@@ -417,8 +415,6 @@ export default function CalendarPage() {
                 )}
               </div>
             )}
-
-            {/* Sprint Details */}
 
             {selectedEvent.sprint && (
               <div className="mt-4 space-y-3">

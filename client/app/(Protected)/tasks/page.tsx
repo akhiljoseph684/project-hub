@@ -168,7 +168,6 @@ export default function MyTasksPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-6 sm:px-6 lg:px-8">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">My Tasks</h1>
 
@@ -177,7 +176,6 @@ export default function MyTasksPage() {
         </p>
       </div>
 
-      {/* Search */}
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
@@ -189,7 +187,6 @@ export default function MyTasksPage() {
         />
       </div>
 
-      {/* Statistics */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="flex items-center justify-between p-6">
@@ -248,7 +245,6 @@ export default function MyTasksPage() {
         </Card>
       </div>
 
-      {/* Tasks */}
       {loading ? (
         <div className="flex h-64 items-center justify-center bg-background">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -277,7 +273,6 @@ export default function MyTasksPage() {
             >
               <CardContent className="p-5">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  {/* Task info */}
                   <div className="min-w-0 flex-1">
                     <div className="mb-2 flex flex-wrap items-center gap-2">
                       <span className="text-sm font-semibold text-primary">
@@ -297,7 +292,6 @@ export default function MyTasksPage() {
                       </p>
                     )}
 
-                    {/* Project */}
                     <p className="mt-3 text-sm text-muted-foreground">
                       Project:{" "}
                       <span className="font-medium text-foreground">
@@ -306,7 +300,6 @@ export default function MyTasksPage() {
                     </p>
                   </div>
 
-                  {/* Task metadata */}
                   <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                     <Badge variant="outline">
                       {task.status?.name || "Unknown"}
@@ -328,8 +321,7 @@ export default function MyTasksPage() {
                     )}
                   </div>
                 </div>
-
-                {/* Bottom information */}
+                
                 <div className="mt-4 flex flex-wrap gap-4 border-t pt-4 text-xs text-muted-foreground">
                   <span>Comments: {task._count?.comments ?? 0}</span>
 

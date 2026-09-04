@@ -16,11 +16,12 @@ import { useAppSelector } from "@/redux/hooks";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { removeTaskFromSprint } from "@/services/task.service";
+import ShowSprintDialog from "@/components/projects/sprint/show-sprint-dialog";
 
 export default function SprintPage() {
   const project = useAppSelector((state) => state.project.currentProject);
 
-  if(!project)return;
+  if (!project) return;
 
   const projectId = project?.id;
 
@@ -357,186 +358,21 @@ export default function SprintPage() {
         </div>
       )}
 
-      {showSprintDialog && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={handleCloseSprint}
-        >
-          <div
-            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-background p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {loadingSprint && (
-              <div className="py-10 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Loading sprint details...
-                </p>
-              </div>
-            )}
-
-            {!loadingSprint && selectedSprint && (
-              <>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-semibold">
-                      {selectedSprint.name}
-                    </h2>
-
-                    {selectedSprint.goal && (
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {selectedSprint.goal}
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleCloseSprint}
-                    className="rounded-md px-2 py-1 text-lg text-muted-foreground hover:bg-muted"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                  <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">Status</p>
-
-                    <p className="mt-1 text-sm font-medium">
-                      {selectedSprint.status}
-                    </p>
-                  </div>
-
-                  <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">Tasks</p>
-
-                    <p className="mt-1 text-sm font-medium">
-                      {selectedSprint.tasks?.length ??
-                        selectedSprint._count?.tasks ??
-                        0}
-                    </p>
-                  </div>
-
-                  <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">Start Date</p>
-
-                    <p className="mt-1 text-sm font-medium">
-                      {selectedSprint.startDate
-                        ? new Date(
-                            selectedSprint.startDate,
-                          ).toLocaleDateString()
-                        : "Not set"}
-                    </p>
-                  </div>
-
-                  <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">End Date</p>
-
-                    <p className="mt-1 text-sm font-medium">
-                      {selectedSprint.endDate
-                        ? new Date(selectedSprint.endDate).toLocaleDateString()
-                        : "Not set"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <div className="mb-3 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold">Sprint Tasks</h3>
-
-                    <span className="text-xs text-muted-foreground">
-                      {selectedSprint.tasks?.length ?? 0} tasks
-                    </span>
-                  </div>
-
-                  {selectedSprint.tasks && selectedSprint.tasks.length > 0 ? (
-                    <div className="space-y-2">
-                      {selectedSprint.tasks.map((task) => (
-                        <div
-                          key={task.id}
-                          className="flex items-center gap-3 rounded-lg border p-3"
-                        >
-                          <span className="text-xs font-medium text-muted-foreground">
-                            {task.key}
-                          </span>
-
-                          <span className="flex-1 text-sm font-medium">
-                            {task.title}
-                          </span>
-
-                          {task.status && (
-                            <span className="rounded-full bg-muted px-2 py-1 text-xs">
-                              {task.status.name}
-                            </span>
-                          )}
-
-                          {task.priority && (
-                            <span className="text-xs text-muted-foreground">
-                              {task.priority}
-                            </span>
-                          )}
-
-                          {task.priority && (
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={async () => {
-                                await removeTaskFromSprint(projectId, task.id)
-                                handleOpenSprint(selectedSprint.id);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border border-dashed p-6 text-center">
-                      <p className="text-sm text-muted-foreground">
-                        No tasks in this sprint.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-6 flex justify-end gap-2">
-                  {selectedSprint.status === "PLANNED" && (
-                    <button
-                      type="button"
-                      onClick={() => handleStartSprint(selectedSprint.id)}
-                      disabled={processingSprint}
-                      className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-                    >
-                      {processingSprint ? "Starting..." : "Start Sprint"}
-                    </button>
-                  )}
-
-                  {selectedSprint.status === "ACTIVE" && (
-                    <button
-                      type="button"
-                      onClick={() => handleCompleteSprint(selectedSprint.id)}
-                      disabled={processingSprint}
-                      className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-                    >
-                      {processingSprint ? "Completing..." : "Complete Sprint"}
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleCloseSprint}
-                    disabled={processingSprint}
-                    className="rounded-md border px-4 py-2 text-sm"
-                  >
-                    Close
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      <ShowSprintDialog
+        open={showSprintDialog}
+        onOpenChange={setShowSprintDialog}
+        sprint={selectedSprint}
+        loading={loadingSprint}
+        processing={processingSprint}
+        projectId={projectId}
+        onStartSprint={handleStartSprint}
+        onCompleteSprint={handleCompleteSprint}
+        onTaskRemoved={() => {
+          if (selectedSprint) {
+            handleOpenSprint(selectedSprint.id);
+          }
+        }}
+      />
     </div>
   );
 }

@@ -337,3 +337,68 @@ export const deleteSprint = async (sprintId) => {
     },
   });
 };
+
+export const getMySprints = async (userId) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  const sprints = await prisma.sprint.findMany({
+    where: {
+      project: {
+        members: {
+          some: {
+            userId,
+          },
+        },
+      },
+    },
+
+    include: {
+      project: {
+        select: {
+          id: true,
+          name: true,
+          key: true,
+        },
+      },
+
+      tasks: {
+        select: {
+          id: true,
+          key: true,
+          title: true,
+          priority: true,
+          dueDate: true,
+
+          status: {
+            select: {
+              id: true,
+              name: true,
+              color: true,
+            },
+          },
+
+          assignee: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatar: true,
+            },
+          },
+        },
+
+        orderBy: {
+          position: "asc",
+        },
+      },
+    },
+
+    orderBy: {
+      startDate: "desc",
+    },
+  });
+
+  return sprints;
+};

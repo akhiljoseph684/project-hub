@@ -36,13 +36,34 @@ export interface Sprint {
   goal?: string | null;
   startDate?: string | null;
   endDate?: string | null;
+  status: string;
 
-  status: "PLANNED" | "ACTIVE" | "COMPLETED";
+  project: {
+    id: string;
+    name: string;
+    key: string;
+  };
 
-  createdAt: string;
-  updatedAt: string;
+  tasks?: {
+    id: string;
+    key: string;
+    title: string;
+    priority?: string;
+    dueDate?: string | null;
 
-  tasks?: SprintTask[];
+    status?: {
+      id: string;
+      name: string;
+      color: string;
+    };
+
+    assignee?: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatar?: string | null;
+    } | null;
+  }[];
 
   _count?: {
     tasks: number;
@@ -165,6 +186,22 @@ export const deleteSprint = async (sprintId: string) => {
 
     return res.data;
   } catch (error: any) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Something went wrong",
+      }
+    );
+  }
+};
+
+export const getMySprints = async () => {
+  try {
+    const res = await api.get("/sprints/me");
+
+    return res.data.sprints;
+  } catch (error: any) {
+    console.error("Failed to fetch my sprints:", error);
     throw (
       error.response?.data || {
         success: false,

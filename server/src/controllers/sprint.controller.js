@@ -6,6 +6,7 @@ import {
   startSprint,
   completeSprint,
   deleteSprint,
+  getMySprints,
 } from "../services/sprint.service.js";
 
 export const createSprintController = async (req, res) => {
@@ -148,6 +149,27 @@ export const deleteSprintController = async (req, res) => {
     return res.status(400).json({
       success: false,
       message: error.message || "Failed to delete sprint",
+    });
+  }
+};
+
+export const getMySprintsController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const sprints = await getMySprints(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Sprints fetched successfully",
+      sprints,
+    });
+  } catch (error) {
+    console.error("Get my sprints error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch sprints",
     });
   }
 };

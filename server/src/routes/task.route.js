@@ -6,6 +6,7 @@ import {
   createTaskController,
   deleteTaskAttachmentController,
   getBacklogTasksController,
+  getMyTasksController,
   getTaskByIdController,
   getTasksByProjectController,
   removeTaskFromSprintController,
@@ -31,6 +32,8 @@ router.patch(
 );
 
 router.get("/projects/:projectId", verifyUser, getTasksByProjectController);
+
+router.get("/my-tasks", verifyUser, getMyTasksController);
 
 router.post(
   "/:taskId/attachments",

@@ -13,9 +13,14 @@ import {
 
 import { showErrorToast } from "@/lib/toast";
 import { useAppSelector } from "@/redux/hooks";
+import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { removeTaskFromSprint } from "@/services/task.service";
 
 export default function SprintPage() {
   const project = useAppSelector((state) => state.project.currentProject);
+
+  if(!project)return;
 
   const projectId = project?.id;
 
@@ -191,7 +196,6 @@ export default function SprintPage() {
 
   return (
     <div className="space-y-6 p-6">
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Sprints</h1>
@@ -215,7 +219,6 @@ export default function SprintPage() {
           <h2 className="mb-4 text-lg font-semibold">Create Sprint</h2>
 
           <form onSubmit={handleCreateSprint} className="space-y-4">
-
             <div>
               <label className="mb-1 block text-sm font-medium">
                 Sprint Name
@@ -319,7 +322,6 @@ export default function SprintPage() {
               onClick={() => handleOpenSprint(sprint.id)}
               className="cursor-pointer rounded-lg border bg-card p-5 transition hover:bg-muted/50"
             >
-
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-semibold">{sprint.name}</h2>
@@ -331,11 +333,12 @@ export default function SprintPage() {
                   )}
                 </div>
 
-                <span className={`rounded-full bg-muted px-3 py-1 text-xs font-medium ${sprint.status === "PLANNED" ? "text-blue-500" : sprint.status === "ACTIVE" ? "text-indigo-600" : "text-emerald-600"}`}>
+                <span
+                  className={`rounded-full bg-muted px-3 py-1 text-xs font-medium ${sprint.status === "PLANNED" ? "text-blue-500" : sprint.status === "ACTIVE" ? "text-indigo-600" : "text-emerald-600"}`}
+                >
                   {sprint.status}
                 </span>
               </div>
-
 
               <div className="mt-4 flex flex-wrap gap-6 text-sm text-muted-foreground">
                 <span>Tasks: {sprint._count?.tasks ?? 0}</span>
@@ -366,7 +369,6 @@ export default function SprintPage() {
             className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-background p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-
             {loadingSprint && (
               <div className="py-10 text-center">
                 <p className="text-sm text-muted-foreground">
@@ -377,7 +379,6 @@ export default function SprintPage() {
 
             {!loadingSprint && selectedSprint && (
               <>
-
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h2 className="text-xl font-semibold">
@@ -476,6 +477,19 @@ export default function SprintPage() {
                             <span className="text-xs text-muted-foreground">
                               {task.priority}
                             </span>
+                          )}
+
+                          {task.priority && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={async () => {
+                                await removeTaskFromSprint(projectId, task.id)
+                                handleOpenSprint(selectedSprint.id);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
                           )}
                         </div>
                       ))}

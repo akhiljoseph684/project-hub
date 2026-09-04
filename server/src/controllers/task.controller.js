@@ -304,3 +304,24 @@ export async function getBacklogTasksController(req, res) {
     });
   }
 }
+
+export const getMyTasksController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const tasks = await taskService.getMyTasks(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Assigned tasks fetched successfully",
+      tasks,
+    });
+  } catch (error) {
+    console.error("Get my tasks error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch assigned tasks",
+    });
+  }
+};

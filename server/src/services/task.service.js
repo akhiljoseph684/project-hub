@@ -778,3 +778,72 @@ export const getBacklogTasks = async ({ projectId, userId }) => {
 
   return tasks.map(formatBoardTask);
 };
+
+export const getMyTasks = async (userId) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  const tasks = await prisma.task.findMany({
+    where: {
+      assigneeId: userId,
+    },
+
+    include: {
+      project: {
+        select: {
+          id: true,
+          name: true,
+          key: true,
+        },
+      },
+
+      status: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+
+      assignee: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          avatar: true,
+        },
+      },
+
+      sprint: {
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          startDate: true,
+          endDate: true,
+        },
+      },
+
+      labels: true,
+
+      _count: {
+        select: {
+          comments: true,
+          attachments: true,
+          checklists: true,
+        },
+      },
+    },
+
+    orderBy: [
+      {
+        dueDate: "asc",
+      },
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
+
+  return tasks;
+};

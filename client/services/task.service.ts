@@ -130,7 +130,7 @@ export const removeTaskFromSprint = async (
   taskId: string,
 ) => {
   try {
-    const res = await api.delete(`/tasks/${projectId}/${taskId}/sprint`);
+    const res = await api.delete(`/task/${projectId}/${taskId}/sprint`);
 
     return res.data;
   } catch (error: any) {
@@ -157,3 +157,14 @@ export async function getBacklogTasks(projectId: string) {
     );
   }
 }
+
+export const getMyTasks = async () => {
+  try {
+    const res = await api.get("/task/my-tasks");
+
+    return res.data.tasks;
+  } catch (error) {
+    console.error("Failed to fetch my tasks:", error);
+    throw error;
+  }
+};

@@ -74,7 +74,6 @@ export const getProjectOverview = async ({ projectId, userId }) => {
     },
   });
 
-  // Get project members
   const members = await prisma.projectMember.findMany({
     where: {
       projectId,

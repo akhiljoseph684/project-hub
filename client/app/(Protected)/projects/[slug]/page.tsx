@@ -397,7 +397,6 @@ export default function ProjectOverviewPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Project Header */}
       <Card>
         <CardContent className="p-6">
           <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
@@ -451,7 +450,6 @@ export default function ProjectOverviewPage() {
         </CardContent>
       </Card>
 
-      {/* Statistics */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-5">
@@ -530,7 +528,6 @@ export default function ProjectOverviewPage() {
         </Card>
       </div>
 
-      {/* Progress + Sprint */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -689,9 +686,7 @@ export default function ProjectOverviewPage() {
         </Card>
       </div>
 
-      {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Task Status */}
         <Card>
           <CardHeader>
             <CardTitle>Tasks by Status</CardTitle>
@@ -745,7 +740,6 @@ export default function ProjectOverviewPage() {
           </CardContent>
         </Card>
 
-        {/* Priority */}
         <Card>
           <CardHeader>
             <CardTitle>Tasks by Priority</CardTitle>
@@ -788,7 +782,6 @@ export default function ProjectOverviewPage() {
         </Card>
       </div>
 
-      {/* Sprint Statistics + Team */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -927,7 +920,6 @@ export default function ProjectOverviewPage() {
         </Card>
       </div>
 
-      {/* Recent Activity */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -999,7 +991,6 @@ export default function ProjectOverviewPage() {
         </CardContent>
       </Card>
 
-      {/* Project Details */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

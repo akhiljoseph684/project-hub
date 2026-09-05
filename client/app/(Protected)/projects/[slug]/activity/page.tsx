@@ -44,6 +44,8 @@ interface ActivityItem {
 export default function ProjectActivityPage() {
   const project = useAppSelector((state) => state.project.currentProject);
 
+  const { user } = useAppSelector((state) => state.auth);
+
   const [activities, setActivities] = useState<ActivityItem[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -74,10 +76,10 @@ export default function ProjectActivityPage() {
     }
   };
 
-  const getUserName = (user?: ActivityUser) => {
-    if (!user) return "Unknown user";
+  const getUserName = (u?: ActivityUser) => {
+    if (!u || !user) return "Unknown user";
 
-    return `${user.firstName} ${user.lastName}`;
+    return user.id === u.id ? "You" : `${u.firstName} ${u.lastName}`;
   };
 
   const getActivityIcon = (type: string) => {

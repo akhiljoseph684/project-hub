@@ -33,3 +33,14 @@ export const getProfile = async () => {
     );
   }
 };
+
+export const getUserDashboard = async () => {
+  try {
+    const response = await api.get("/user/dashboard");
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch user dashboard:", error);
+    throw error;
+  }
+};

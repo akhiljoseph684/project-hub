@@ -2,6 +2,7 @@ import { uploadImage } from "../services/upload.service.js";
 import {
   updateUserProfileService,
   getUserProfileService,
+  getUserDashboard,
 } from "../services/user.service.js";
 
 export const updateProfile = async (req, res) => {
@@ -17,7 +18,6 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-
     let avatar = null;
 
     if (req.file) {
@@ -26,12 +26,11 @@ export const updateProfile = async (req, res) => {
       avatar = uploaded.secure_url;
     }
 
-    
     const user = await updateUserProfileService(userId, {
       firstName,
       lastName,
       phone,
-      avatar
+      avatar,
     });
 
     return res.status(200).json({
@@ -69,3 +68,25 @@ export const getProfile = async (req, res) => {
   }
 };
 
+export const getUserDashboardController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const dashboard = await getUserDashboard({
+      userId,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "User dashboard fetched successfully",
+      data: dashboard,
+    });
+  } catch (error) {
+    console.error("Get user dashboard error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch user dashboard",
+    });
+  }
+};

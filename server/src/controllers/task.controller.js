@@ -43,7 +43,7 @@ export async function updateTaskStatusController(req, res) {
       });
     }
 
-    const task = await taskService.updateTaskStatus(taskId, statusId);
+    const task = await taskService.updateTaskStatus(taskId, statusId, req.user.id);
 
     return res.status(200).json({
       success: true,
@@ -112,6 +112,8 @@ export async function uploadTaskAttachmentController(req, res) {
       uploadedById: req.user.id,
 
       file: req.file,
+
+      userId: req.user.id
     });
 
     return res.status(201).json({
@@ -226,6 +228,7 @@ export async function assignTaskToSprintController(req, res) {
       taskId,
       sprintId,
       projectId,
+      userId: req.user.id
     });
 
     return res.status(200).json({
@@ -257,6 +260,7 @@ export async function removeTaskFromSprintController(req, res) {
     const task = await taskService.removeTaskFromSprint({
       taskId,
       projectId,
+      userId: req.user.id
     });
 
     return res.status(200).json({

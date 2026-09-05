@@ -1,4 +1,5 @@
 import prisma from "../../config/prisma.js";
+import { createProjectActivity } from "./project-activity.service.js";
 
 export const createTask = async ({ projectId, userId, body }) => {
   const {
@@ -102,6 +103,17 @@ export const createTask = async ({ projectId, userId, body }) => {
       },
 
       checklists: true,
+    },
+  });
+
+  await createProjectActivity({
+    projectId,
+    userId,
+    type: "TASK_CREATED",
+    metadata: {
+      taskId: task.id,
+      taskKey: task.key,
+      taskTitle: task.title,
     },
   });
 
@@ -270,10 +282,23 @@ export const getProjectBoard = async ({ projectId, userId, filters = {} }) => {
   }));
 };
 
-export async function updateTaskStatus(taskId, statusId) {
+export async function updateTaskStatus(taskId, statusId, userId) {
   const task = await prisma.task.findUnique({
     where: {
       id: taskId,
+    },
+    select: {
+      id: true,
+      projectId: true,
+      key: true,
+      title: true,
+      statusId: true,
+      status: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 
@@ -285,6 +310,11 @@ export async function updateTaskStatus(taskId, statusId) {
     where: {
       id: statusId,
     },
+    select: {
+      id: true,
+      name: true,
+      projectId: true,
+    },
   });
 
   if (!status) {
@@ -293,6 +323,10 @@ export async function updateTaskStatus(taskId, statusId) {
 
   if (status.projectId !== task.projectId) {
     throw new Error("Task status does not belong to this project");
+  }
+
+  if (task.statusId === statusId) {
+    return;
   }
 
   const updatedTask = await prisma.task.update({
@@ -304,6 +338,19 @@ export async function updateTaskStatus(taskId, statusId) {
     },
     include: {
       status: true,
+    },
+  });
+
+  await createProjectActivity({
+    projectId: task.projectId,
+    userId,
+    type: "TASK_STATUS_CHANGED",
+    metadata: {
+      taskId: updatedTask.id,
+      taskKey: updatedTask.key,
+      taskTitle: updatedTask.title,
+      fromStatus: task.status.name,
+      toStatus: status.name,
     },
   });
 
@@ -621,7 +668,12 @@ export async function getTaskById(taskId) {
   };
 }
 
-export const assignTaskToSprint = async ({ taskId, sprintId, projectId }) => {
+export const assignTaskToSprint = async ({
+  taskId,
+  sprintId,
+  projectId,
+  userId,
+}) => {
   const task = await prisma.task.findFirst({
     where: {
       id: taskId,
@@ -689,14 +741,35 @@ export const assignTaskToSprint = async ({ taskId, sprintId, projectId }) => {
     },
   });
 
+  await createProjectActivity({
+    projectId,
+    userId,
+    type: "TASK_ADDED_TO_SPRINT",
+    metadata: {
+      taskId: updatedTask.id,
+      taskKey: updatedTask.key,
+      taskTitle: updatedTask.title,
+      sprintId: sprint.id,
+      sprintName: sprint.name,
+    },
+  });
+
   return updatedTask;
 };
 
-export const removeTaskFromSprint = async ({ taskId, projectId }) => {
+export const removeTaskFromSprint = async ({ taskId, projectId, userId }) => {
   const task = await prisma.task.findFirst({
     where: {
       id: taskId,
       projectId,
+    },
+    include: {
+      sprint: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 
@@ -704,9 +777,11 @@ export const removeTaskFromSprint = async ({ taskId, projectId }) => {
     throw new Error("Task not found.");
   }
 
-  if (!task.sprintId) {
+  if (!task.sprintId || !task.sprint) {
     throw new Error("Task is not assigned to a sprint.");
   }
+
+  const oldSprint = task.sprint;
 
   const updatedTask = await prisma.task.update({
     where: {
@@ -720,6 +795,19 @@ export const removeTaskFromSprint = async ({ taskId, projectId }) => {
     include: {
       status: true,
       sprint: true,
+    },
+  });
+
+  await createProjectActivity({
+    projectId,
+    userId,
+    type: "TASK_REMOVED_FROM_SPRINT",
+    metadata: {
+      taskId: updatedTask.id,
+      taskKey: updatedTask.key,
+      taskTitle: updatedTask.title,
+      sprintId: oldSprint.id,
+      sprintName: oldSprint.name,
     },
   });
 

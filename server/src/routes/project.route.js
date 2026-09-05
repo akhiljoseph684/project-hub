@@ -24,17 +24,32 @@ import { verifyUser } from "../middleware/auth.middleware.js";
 import upload from "../middleware/upload.middleware.js";
 import { PERMISSIONS } from "../../constants/permissions.js";
 import { requireProjectPermission } from "../middleware/project-permission.middleware.js";
+import { getProjectActivitiesController } from "../controllers/project-activity.controller.js";
 
 const router = express.Router();
 
 router.get("/search-users", verifyUser, searchUsers);
 router.post("/", verifyUser, upload.single("icon"), createProject);
 router.get("/", verifyUser, getProjects);
-router.get("/:slug", verifyUser, getProjectBySlug);
 
-router.post("/:projectId/roles", verifyUser, requireProjectPermission(PERMISSIONS.ROLE_CREATE), createRole);
-router.patch("/:projectId/roles/:roleId", verifyUser, requireProjectPermission(PERMISSIONS.ROLE_UPDATE), updateRole);
-router.delete("/:projectId/roles/:roleId", verifyUser, requireProjectPermission(PERMISSIONS.ROLE_DELETE), deleteRole);
+router.post(
+  "/:projectId/roles",
+  verifyUser,
+  requireProjectPermission(PERMISSIONS.ROLE_CREATE),
+  createRole,
+);
+router.patch(
+  "/:projectId/roles/:roleId",
+  verifyUser,
+  requireProjectPermission(PERMISSIONS.ROLE_UPDATE),
+  updateRole,
+);
+router.delete(
+  "/:projectId/roles/:roleId",
+  verifyUser,
+  requireProjectPermission(PERMISSIONS.ROLE_DELETE),
+  deleteRole,
+);
 router.get("/:projectId/roles", verifyUser, getProjectRoles);
 
 router.get("/:projectId/members", verifyUser, getProjectMembersController);
@@ -82,6 +97,15 @@ router.delete(
 
 router.get("/invitations/me", verifyUser, getMyProjectInvitationsController);
 
-router.get("/:projectId/board", verifyUser, requireProjectPermission(PERMISSIONS.PROJECT_VIEW),  getProjectBoardController);
+router.get("/:projectId/activity", verifyUser, getProjectActivitiesController);
+
+router.get(
+  "/:projectId/board",
+  verifyUser,
+  requireProjectPermission(PERMISSIONS.PROJECT_VIEW),
+  getProjectBoardController,
+);
+
+router.get("/:slug", verifyUser, getProjectBySlug);
 
 export default router;

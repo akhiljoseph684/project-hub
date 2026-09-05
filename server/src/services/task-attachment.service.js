@@ -1,8 +1,14 @@
 import cloudinary from "../../config/cloudinary.js";
 import prisma from "../../config/prisma.js";
+import { createProjectActivity } from "./project-activity.service.js";
 import { uploadToCloudinary } from "./storage/cloudinary.service.js";
 
-export async function createTaskAttachment({ taskId, uploadedById, file }) {
+export async function createTaskAttachment({
+  taskId,
+  uploadedById,
+  file,
+  userId,
+}) {
   if (!file) {
     throw new Error("File is required");
   }
@@ -52,6 +58,16 @@ export async function createTaskAttachment({ taskId, uploadedById, file }) {
           avatar: true,
         },
       },
+    },
+  });
+
+  await createProjectActivity({
+    projectId: task.projectId,
+    userId,
+    type: "FILE_UPLOADED",
+    metadata: {
+      fileId: attachment.id,
+      fileName: attachment.fileName,
     },
   });
 
@@ -125,6 +141,16 @@ export async function deleteTaskAttachment({ attachmentId, userId }) {
   await prisma.taskAttachment.delete({
     where: {
       id: attachmentId,
+    },
+  });
+
+  await createProjectActivity({
+    projectId: task.projectId,
+    userId,
+    type: "FILE_DELETED",
+    metadata: {
+      fileId: attachment.id,
+      fileName: attachment.fileName,
     },
   });
 

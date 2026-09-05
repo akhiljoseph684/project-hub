@@ -191,6 +191,7 @@ export const updateProjectMemberRoleController = async (req, res, next) => {
       projectId,
       memberId,
       roleId,
+      userId: req.user.id
     });
 
     return res.status(200).json({

@@ -1,5 +1,6 @@
 import slugify from "slugify";
 import prisma from "../../config/prisma.js";
+import { createProjectActivity } from "./project-activity.service.js";
 
 export const searchUsersService = async (search) => {
   const users = await prisma.user.findMany({
@@ -189,6 +190,19 @@ export const createProject = async ({ ownerId, body, file }) => {
         projectId: project.id,
         userId: ownerId,
         roleId: ownerRole.id,
+      },
+    });
+    
+    await tx.projectActivity.create({
+      data: {
+        projectId: project.id,
+        userId: ownerId,
+        type: "PROJECT_CREATED",
+        metadata: {
+          projectId: project.id,
+          projectName: project.name,
+          projectKey: project.key,
+        },
       },
     });
 
@@ -559,11 +573,27 @@ export const updateProjectMemberRole = async ({
   projectId,
   memberId,
   roleId,
+  userId,
 }) => {
   const member = await prisma.projectMember.findFirst({
     where: {
       id: memberId,
       projectId,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+        },
+      },
+      role: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 
@@ -586,6 +616,8 @@ export const updateProjectMemberRole = async ({
   if (member.roleId === role.id) {
     throw new Error("Member already has this role.");
   }
+
+  const oldRole = member.role;
 
   const updatedMember = await prisma.projectMember.update({
     where: {
@@ -619,6 +651,19 @@ export const updateProjectMemberRole = async ({
     },
   });
 
+  await createProjectActivity({
+    projectId,
+    userId,
+    type: "MEMBER_ROLE_UPDATED",
+    metadata: {
+      memberId,
+      memberUserId: member.userId,
+      memberName: `${member.user.firstName} ${member.user.lastName}`.trim(),
+      oldRole: oldRole?.name,
+      newRole: role.name,
+    },
+  });
+
   return updatedMember;
 };
 
@@ -628,11 +673,17 @@ export const removeProjectMember = async ({ projectId, memberId }) => {
       id: memberId,
       projectId,
     },
-
     include: {
       project: {
         select: {
           ownerId: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
         },
       },
     },
@@ -649,6 +700,17 @@ export const removeProjectMember = async ({ projectId, memberId }) => {
   await prisma.projectMember.delete({
     where: {
       id: memberId,
+    },
+  });
+
+  await createProjectActivity({
+    projectId,
+    userId: member.userId,
+    type: "MEMBER_REMOVED",
+    metadata: {
+      memberId,
+      userId: member.userId,
+      memberName: `${member.user.firstName} ${member.user.lastName}`.trim(),
     },
   });
 
@@ -852,6 +914,17 @@ export const acceptProjectInvitation = async ({ invitationId, userId }) => {
       },
       data: {
         status: "ACCEPTED",
+      },
+    });
+
+    await createProjectActivity({
+      prismaClient: tx,
+      projectId: invitation.projectId,
+      userId,
+      type: "MEMBER_ADDED",
+      metadata: {
+        memberId: projectMember.id,
+        userId,
       },
     });
 

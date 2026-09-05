@@ -95,7 +95,7 @@ export const startSprintController = async (req, res) => {
   try {
     const { sprintId } = req.params;
 
-    const sprint = await startSprint(sprintId);
+    const sprint = await startSprint(sprintId, req.user.id);
 
     return res.status(200).json({
       success: true,
@@ -116,7 +116,7 @@ export const completeSprintController = async (req, res) => {
   try {
     const { sprintId } = req.params;
 
-    const sprint = await completeSprint(sprintId);
+    const sprint = await completeSprint(sprintId, req.user.id);
 
     return res.status(200).json({
       success: true,

@@ -1,4 +1,5 @@
 import prisma from "../../config/prisma.js";
+import { createProjectActivity } from "./project-activity.service.js";
 
 export const createSprint = async (projectId, data) => {
   const { name, goal, startDate, endDate } = data;
@@ -208,7 +209,7 @@ export const updateSprint = async (sprintId, data) => {
   });
 };
 
-export const startSprint = async (sprintId) => {
+export const startSprint = async (sprintId, userId) => {
   const sprint = await prisma.sprint.findUnique({
     where: {
       id: sprintId,
@@ -237,7 +238,7 @@ export const startSprint = async (sprintId) => {
     throw new Error("Another sprint is already active");
   }
 
-  return await prisma.sprint.update({
+  const res = await prisma.sprint.update({
     where: {
       id: sprintId,
     },
@@ -246,9 +247,20 @@ export const startSprint = async (sprintId) => {
       startDate: sprint.startDate || new Date(),
     },
   });
+
+  await createProjectActivity({
+    projectId: sprint.projectId,
+    userId,
+    type: "SPRINT_STARTED",
+    metadata: {
+      sprintId: sprint.id,
+      sprintName: sprint.name,
+    },
+  });
+  return res;
 };
 
-export const completeSprint = async (sprintId) => {
+export const completeSprint = async (sprintId, userId) => {
   const sprint = await prisma.sprint.findUnique({
     where: {
       id: sprintId,
@@ -304,6 +316,16 @@ export const completeSprint = async (sprintId) => {
     });
 
     return completedSprint;
+  });
+
+  await createProjectActivity({
+    projectId: sprint.projectId,
+    userId,
+    type: "SPRINT_COMPLETED",
+    metadata: {
+      sprintId: sprint.id,
+      sprintName: sprint.name,
+    },
   });
 
   return result;

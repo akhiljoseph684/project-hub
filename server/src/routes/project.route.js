@@ -25,6 +25,7 @@ import upload from "../middleware/upload.middleware.js";
 import { PERMISSIONS } from "../../constants/permissions.js";
 import { requireProjectPermission } from "../middleware/project-permission.middleware.js";
 import { getProjectActivitiesController } from "../controllers/project-activity.controller.js";
+import { getProjectOverviewController } from "../controllers/project-overview.controller.js";
 
 const router = express.Router();
 
@@ -105,6 +106,8 @@ router.get(
   requireProjectPermission(PERMISSIONS.PROJECT_VIEW),
   getProjectBoardController,
 );
+
+router.get("/:projectId/overview", verifyUser, getProjectOverviewController);
 
 router.get("/:slug", verifyUser, getProjectBySlug);
 

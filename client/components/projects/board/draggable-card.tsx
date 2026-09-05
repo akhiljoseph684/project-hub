@@ -20,6 +20,7 @@ export default function DraggableCard({ task, columnId }: DraggableCardProps) {
     isDragging,
   } = useSortable({
     id: task.id,
+
     data: {
       type: "task",
       task,
@@ -40,7 +41,7 @@ export default function DraggableCard({ task, columnId }: DraggableCardProps) {
       style={style}
       {...attributes}
       {...listeners}
-      className="touch-none"
+      className="touch-none select-none"
     >
       <BoardCard task={task} />
     </div>

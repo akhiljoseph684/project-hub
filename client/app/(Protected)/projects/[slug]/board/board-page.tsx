@@ -9,6 +9,10 @@ import BoardList, {
 import BoardEmpty from "@/components/projects/board/board-empty";
 import CreateTaskDialog from "@/components/projects/task/create-task-dialog";
 
+import TaskDetailsDialog, {
+  TaskDetailsData,
+} from "@/components/projects/taskDetails/task-details-dialog";
+
 import { useAppSelector } from "@/redux/hooks";
 
 import { getProjectBoard, getProjectMembers } from "@/services/project.service";
@@ -20,6 +24,7 @@ import DeleteStatusDialog from "@/components/projects/board/delete-status-dialog
 import { Loader2 } from "lucide-react";
 import { useQueryParams } from "@/hooks/use-query-params";
 import { useDebounce } from "@/hooks/useDebounce";
+import { getTaskById } from "@/services/task.service";
 
 interface BoardMember {
   id: string;
@@ -59,7 +64,13 @@ export default function BoardPage() {
 
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
 
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+
   const [deleteStatusOpen, setDeleteStatusOpen] = useState(false);
+
+  const [selectedTask, setSelectedTask] = useState<TaskDetailsData | null>(
+    null,
+  );
 
   const [priority, setPriority] = useState("all");
 
@@ -92,7 +103,7 @@ export default function BoardPage() {
         assignee: assignee !== "all" ? assignee : undefined,
         priority: priority !== "all" ? priority : undefined,
       });
-      
+
       const res = await getProjectBoard(project.id, query);
 
       setColumns(res.board);
@@ -205,8 +216,17 @@ export default function BoardPage() {
           setColumns={setColumns}
           onCreateStatus={() => setStatusDialogOpen(true)}
           onDeleteStatus={handleDeleteStatus}
-          onTaskClick={(task) => {
-            console.log("Task clicked:", task);
+          onTaskClick={async (task) => {
+            try {
+              const response = await getTaskById(task.id);
+
+              setSelectedTask(response.task);
+              setTaskDialogOpen(true);
+            } catch (error: any) {
+              showErrorToast(
+                error?.response?.data?.message || "Failed to load task details",
+              );
+            }
           }}
           onCreateTask={(columnId) => {
             setDefaultStatusId(columnId);
@@ -250,6 +270,11 @@ export default function BoardPage() {
 
           setSelectedStatus(null);
         }}
+      />
+      <TaskDetailsDialog
+        open={taskDialogOpen}
+        onOpenChange={setTaskDialogOpen}
+        task={selectedTask}
       />
     </div>
   );

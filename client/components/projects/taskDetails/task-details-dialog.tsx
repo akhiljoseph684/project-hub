@@ -91,6 +91,7 @@ export default function TaskDetailsDialog({
   task,
 }: TaskDetailsDialogProps) {
   if (!task) return null;
+  console.log(task)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

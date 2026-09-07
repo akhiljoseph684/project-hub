@@ -16,6 +16,11 @@ import {
 import { requireProjectPermission } from "../middleware/project-permission.middleware.js";
 import { PERMISSIONS } from "../../constants/permissions.js";
 import { uploadTaskAttachment } from "../middleware/upload-attachment.middleware.js";
+import {
+  createTaskCommentController,
+  deleteTaskCommentController,
+  getTaskCommentsController,
+} from "../controllers/task-comment.controller.js";
 
 const router = express.Router();
 
@@ -41,6 +46,12 @@ router.post(
   uploadTaskAttachment,
   uploadTaskAttachmentController,
 );
+
+router.get("/:taskId/comments", verifyUser, getTaskCommentsController);
+
+router.post("/:taskId/comments", verifyUser, createTaskCommentController);
+
+router.delete("/comments/:commentId", verifyUser, deleteTaskCommentController);
 
 router.delete(
   "/attachments/:attachmentId",

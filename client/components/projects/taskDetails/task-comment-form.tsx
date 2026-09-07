@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 
 import type { TaskComment } from "./task-comments";
+import { createTaskComment } from "@/services/task-comment.service";
 
 interface TaskCommentFormProps {
   taskId: string;
@@ -24,64 +25,25 @@ export default function TaskCommentForm({
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const trimmedContent = content.trim();
-
-    if (!trimmedContent) {
-      showErrorToast("Please enter a comment.");
-      return;
-    }
+  const handleSubmit = async () => {
+    if (!content.trim()) return;
 
     try {
       setLoading(true);
 
-      /*
-      const response = await createTaskComment(
-         taskId,
-         {
-           content: trimmedContent,
-         },
-       );
-      
-       onSuccess?.(response.comment);
-       */
+      const response = await createTaskComment(taskId, content.trim());
 
-      console.log("Create comment:", {
-        taskId,
-        content: trimmedContent,
-      });
-      
-      const temporaryComment: TaskComment = {
-        id: `temp-${Date.now()}`,
-        content: trimmedContent,
-        createdAt: new Date().toISOString(),
-        user: {
-          id: "current-user",
-          name: "You",
-          avatar: null,
-        },
-      };
-
-      onSuccess?.(temporaryComment);
-
-      setContent("");
-
-      showSuccessToast("Comment added successfully.");
-    } catch (error: any) {
-      console.error("Create comment error:", error);
-
-      showErrorToast(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to add comment.",
-      );
+      if (response?.success) {
+        onSuccess?.(response.data);
+        setContent("");
+      }
+    } catch (error) {
+      console.error("Failed to create comment:", error);
+      showErrorToast("Failed to create comment");
     } finally {
       setLoading(false);
     }
-  }
-
+  };
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();

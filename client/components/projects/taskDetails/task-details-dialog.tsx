@@ -14,6 +14,7 @@ import TaskDetails from "./task-details";
 import TaskComments from "./task-comments";
 import TaskAttachments from "./task-attachments";
 import TaskChecklist from "./task-checklist";
+import { useAppSelector } from "@/redux/hooks";
 
 export interface TaskDetailsData {
   id: string;
@@ -90,8 +91,9 @@ export default function TaskDetailsDialog({
   onOpenChange,
   task,
 }: TaskDetailsDialogProps) {
-  if (!task) return null;
-  console.log(task)
+  const { user } = useAppSelector((state) => state.auth); 
+
+  if (!task || !user) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -173,7 +175,8 @@ export default function TaskDetailsDialog({
                 attachments={task.attachments ?? []}
               />
 
-              <TaskComments taskId={task.id} comments={task.comments ?? []} />
+              <TaskComments taskId={task.id} currentUserId={user.id} />
+
             </div>
           </ScrollArea>
         </div>

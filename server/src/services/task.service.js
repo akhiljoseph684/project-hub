@@ -214,8 +214,7 @@ export const getProjectBoard = async ({ projectId, userId, filters = {} }) => {
   ) {
     taskWhere.priority = priority.toUpperCase();
   }
-
-  console.log(filters);
+  
   if (assignedToMe) {
     taskWhere.assigneeId = userId;
   }

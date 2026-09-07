@@ -21,6 +21,7 @@ import {
   deleteTaskCommentController,
   getTaskCommentsController,
 } from "../controllers/task-comment.controller.js";
+import { createTaskChecklistController, deleteTaskChecklistController, getTaskChecklistsController, updateTaskChecklistController } from "../controllers/task-checklist.controller.js";
 
 const router = express.Router();
 
@@ -47,16 +48,32 @@ router.post(
   uploadTaskAttachmentController,
 );
 
+router.delete(
+  "/attachments/:attachmentId",
+  verifyUser,
+  deleteTaskAttachmentController,
+);
+
 router.get("/:taskId/comments", verifyUser, getTaskCommentsController);
 
 router.post("/:taskId/comments", verifyUser, createTaskCommentController);
 
 router.delete("/comments/:commentId", verifyUser, deleteTaskCommentController);
 
-router.delete(
-  "/attachments/:attachmentId",
+router.get("/:taskId/checklists", verifyUser, getTaskChecklistsController);
+
+router.post("/:taskId/checklists", verifyUser, createTaskChecklistController);
+
+router.patch(
+  "/checklists/:checklistId",
   verifyUser,
-  deleteTaskAttachmentController,
+  updateTaskChecklistController,
+);
+
+router.delete(
+  "/checklists/:checklistId",
+  verifyUser,
+  deleteTaskChecklistController,
 );
 
 router.get("/:taskId", verifyUser, getTaskByIdController);

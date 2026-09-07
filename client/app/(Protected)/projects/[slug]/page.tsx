@@ -12,6 +12,7 @@ import {
   ListTodo,
   Loader2,
   Target,
+  User,
   Users,
 } from "lucide-react";
 
@@ -123,9 +124,11 @@ type OverviewData = {
 };
 
 export default function ProjectOverviewPage() {
-  const project = useAppSelector(
-    (state) => state.project.currentProject
-  );
+  const project = useAppSelector((state) => state.project.currentProject);
+
+  const { user } = useAppSelector((state) => state.auth);
+
+  if(!user)return
 
   const [overview, setOverview] = useState<OverviewData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -190,10 +193,43 @@ export default function ProjectOverviewPage() {
           </>
         );
 
+      case "PROJECT_UPDATED":
+        return <>updated the project</>;
+
       case "TASK_CREATED":
         return (
           <>
             created task{" "}
+            <span className="font-medium">
+              {taskTitle || taskKey || "a task"}
+            </span>
+          </>
+        );
+
+      case "TASK_UPDATED":
+        return (
+          <>
+            updated task{" "}
+            <span className="font-medium">
+              {taskTitle || taskKey || "a task"}
+            </span>
+          </>
+        );
+
+      case "TASK_COMPLETED":
+        return (
+          <>
+            completed task{" "}
+            <span className="font-medium">
+              {taskTitle || taskKey || "a task"}
+            </span>
+          </>
+        );
+
+      case "TASK_ASSIGNED":
+        return (
+          <>
+            assigned task{" "}
             <span className="font-medium">
               {taskTitle || taskKey || "a task"}
             </span>
@@ -226,9 +262,7 @@ export default function ProjectOverviewPage() {
               {taskTitle || taskKey || "a task"}
             </span>{" "}
             to sprint{" "}
-            <span className="font-medium">
-              {sprintName || "a sprint"}
-            </span>
+            <span className="font-medium">{sprintName || "a sprint"}</span>
           </>
         );
 
@@ -240,9 +274,7 @@ export default function ProjectOverviewPage() {
               {taskTitle || taskKey || "a task"}
             </span>{" "}
             from sprint{" "}
-            <span className="font-medium">
-              {sprintName || "a sprint"}
-            </span>
+            <span className="font-medium">{sprintName || "a sprint"}</span>
           </>
         );
 
@@ -250,9 +282,7 @@ export default function ProjectOverviewPage() {
         return (
           <>
             created sprint{" "}
-            <span className="font-medium">
-              {sprintName || "a sprint"}
-            </span>
+            <span className="font-medium">{sprintName || "a sprint"}</span>
           </>
         );
 
@@ -260,9 +290,7 @@ export default function ProjectOverviewPage() {
         return (
           <>
             started sprint{" "}
-            <span className="font-medium">
-              {sprintName || "a sprint"}
-            </span>
+            <span className="font-medium">{sprintName || "a sprint"}</span>
           </>
         );
 
@@ -270,18 +298,48 @@ export default function ProjectOverviewPage() {
         return (
           <>
             completed sprint{" "}
+            <span className="font-medium">{sprintName || "a sprint"}</span>
+          </>
+        );
+
+      case "TASK_CHECKLIST_CREATED":
+        return (
+          <>
+            added checklist item{" "}
             <span className="font-medium">
-              {sprintName || "a sprint"}
+              {metadata.title || "a checklist item"}
+            </span>{" "}
+            to{" "}
+            <span className="font-medium">
+              {taskTitle || taskKey || "a task"}
             </span>
           </>
         );
 
-      case "FILE_UPLOADED":
+      case "TASK_CHECKLIST_UPDATED":
         return (
           <>
-            uploaded a file{" "}
+            {metadata.isCompleted ? "completed" : "uncompleted"} checklist item{" "}
             <span className="font-medium">
-              {metadata.fileName || "file"}
+              {metadata.title || "a checklist item"}
+            </span>{" "}
+            in{" "}
+            <span className="font-medium">
+              {taskTitle || taskKey || "a task"}
+            </span>
+          </>
+        );
+
+      case "TASK_CHECKLIST_DELETED":
+        return (
+          <>
+            deleted checklist item{" "}
+            <span className="font-medium">
+              {metadata.title || "a checklist item"}
+            </span>{" "}
+            from{" "}
+            <span className="font-medium">
+              {taskTitle || taskKey || "a task"}
             </span>
           </>
         );
@@ -326,14 +384,40 @@ export default function ProjectOverviewPage() {
           </>
         );
 
+      case "FILE_UPLOADED":
+        return (
+          <>
+            uploaded file{" "}
+            <span className="font-medium">{metadata.fileName || "a file"}</span>
+            {taskKey && (
+              <>
+                {" "}
+                to <span className="font-medium">{taskKey}</span>
+              </>
+            )}
+          </>
+        );
+
+      case "FILE_DELETED":
+        return (
+          <>
+            deleted file{" "}
+            <span className="font-medium">{metadata.fileName || "a file"}</span>
+            {taskKey && (
+              <>
+                {" "}
+                from <span className="font-medium">{taskKey}</span>
+              </>
+            )}
+          </>
+        );
+
       default:
         return (
           <>
             performed{" "}
             <span className="font-medium">
-              {activity.type
-                .replaceAll("_", " ")
-                .toLowerCase()}
+              {activity.type.replaceAll("_", " ").toLowerCase()}
             </span>
           </>
         );
@@ -347,7 +431,7 @@ export default function ProjectOverviewPage() {
 
     const sprintTasks = overview.taskStatus.reduce(
       (total, status) => total + status.count,
-      0
+      0,
     );
 
     if (!sprintTasks) return 0;
@@ -387,12 +471,12 @@ export default function ProjectOverviewPage() {
 
   const maxStatusCount = Math.max(
     ...taskStatus.map((status) => status.count),
-    1
+    1,
   );
 
   const maxPriorityCount = Math.max(
     ...taskPriority.map((item) => item.count),
-    1
+    1,
   );
 
   return (
@@ -404,8 +488,7 @@ export default function ProjectOverviewPage() {
               <div
                 className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-xl font-bold text-white"
                 style={{
-                  backgroundColor:
-                    overview.project.color || "#2563EB",
+                  backgroundColor: overview.project.color || "#2563EB",
                 }}
               >
                 {overview.project.icon ? (
@@ -425,14 +508,10 @@ export default function ProjectOverviewPage() {
                     {overview.project.name}
                   </h1>
 
-                  <Badge variant="secondary">
-                    {overview.project.key}
-                  </Badge>
+                  <Badge variant="secondary">{overview.project.key}</Badge>
 
                   {overview.project.type && (
-                    <Badge variant="outline">
-                      {overview.project.type}
-                    </Badge>
+                    <Badge variant="outline">{overview.project.type}</Badge>
                   )}
                 </div>
 
@@ -455,9 +534,7 @@ export default function ProjectOverviewPage() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">
-                  Total Tasks
-                </p>
+                <p className="text-sm text-muted-foreground">Total Tasks</p>
                 <p className="mt-1 text-2xl font-bold">
                   {statistics.totalTasks}
                 </p>
@@ -474,9 +551,7 @@ export default function ProjectOverviewPage() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">
-                  Completed
-                </p>
+                <p className="text-sm text-muted-foreground">Completed</p>
                 <p className="mt-1 text-2xl font-bold">
                   {statistics.completedTasks}
                 </p>
@@ -493,9 +568,7 @@ export default function ProjectOverviewPage() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">
-                  In Progress
-                </p>
+                <p className="text-sm text-muted-foreground">In Progress</p>
                 <p className="mt-1 text-2xl font-bold">
                   {statistics.inProgressTasks}
                 </p>
@@ -512,9 +585,7 @@ export default function ProjectOverviewPage() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">
-                  Overdue
-                </p>
+                <p className="text-sm text-muted-foreground">Overdue</p>
                 <p className="mt-1 text-2xl font-bold">
                   {statistics.overdueTasks}
                 </p>
@@ -540,13 +611,11 @@ export default function ProjectOverviewPage() {
           <CardContent>
             <div className="flex items-end justify-between">
               <div>
-                <p className="text-4xl font-bold">
-                  {statistics.taskProgress}%
-                </p>
+                <p className="text-4xl font-bold">{statistics.taskProgress}%</p>
 
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {statistics.completedTasks} of{" "}
-                  {statistics.totalTasks} tasks completed
+                  {statistics.completedTasks} of {statistics.totalTasks} tasks
+                  completed
                 </p>
               </div>
 
@@ -564,30 +633,22 @@ export default function ProjectOverviewPage() {
 
             <div className="mt-4 grid grid-cols-3 gap-3 text-center">
               <div>
-                <p className="text-lg font-semibold">
-                  {statistics.todoTasks}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Todo
-                </p>
+                <p className="text-lg font-semibold">{statistics.todoTasks}</p>
+                <p className="text-xs text-muted-foreground">Todo</p>
               </div>
 
               <div>
                 <p className="text-lg font-semibold">
                   {statistics.inProgressTasks}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  In Progress
-                </p>
+                <p className="text-xs text-muted-foreground">In Progress</p>
               </div>
 
               <div>
                 <p className="text-lg font-semibold">
                   {statistics.completedTasks}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Done
-                </p>
+                <p className="text-xs text-muted-foreground">Done</p>
               </div>
             </div>
           </CardContent>
@@ -611,8 +672,7 @@ export default function ProjectOverviewPage() {
                     </h3>
 
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {activeSprint.goal ||
-                        "No sprint goal provided."}
+                      {activeSprint.goal || "No sprint goal provided."}
                     </p>
                   </div>
 
@@ -625,9 +685,7 @@ export default function ProjectOverviewPage() {
                       Sprint progress
                     </span>
 
-                    <span className="font-medium">
-                      {activeSprintProgress}%
-                    </span>
+                    <span className="font-medium">{activeSprintProgress}%</span>
                   </div>
 
                   <div className="h-2 overflow-hidden rounded-full bg-muted">
@@ -642,27 +700,21 @@ export default function ProjectOverviewPage() {
 
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <p className="text-xs text-muted-foreground">
-                      Tasks
-                    </p>
+                    <p className="text-xs text-muted-foreground">Tasks</p>
                     <p className="mt-1 font-semibold">
                       {activeSprint._count?.tasks || 0}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-muted-foreground">
-                      Start
-                    </p>
+                    <p className="text-xs text-muted-foreground">Start</p>
                     <p className="mt-1 text-sm font-medium">
                       {formatDate(activeSprint.startDate)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-muted-foreground">
-                      End
-                    </p>
+                    <p className="text-xs text-muted-foreground">End</p>
                     <p className="mt-1 text-sm font-medium">
                       {formatDate(activeSprint.endDate)}
                     </p>
@@ -673,9 +725,7 @@ export default function ProjectOverviewPage() {
               <div className="py-10 text-center">
                 <FolderKanban className="mx-auto h-10 w-10 text-muted-foreground/50" />
 
-                <p className="mt-3 font-medium">
-                  No active sprint
-                </p>
+                <p className="mt-3 font-medium">No active sprint</p>
 
                 <p className="mt-1 text-sm text-muted-foreground">
                   Start a sprint to see its progress here.
@@ -702,8 +752,7 @@ export default function ProjectOverviewPage() {
                         <span
                           className="h-3 w-3 rounded-full"
                           style={{
-                            backgroundColor:
-                              status.color || "#64748B",
+                            backgroundColor: status.color || "#64748B",
                           }}
                         />
 
@@ -721,11 +770,8 @@ export default function ProjectOverviewPage() {
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
-                          width: `${
-                            (status.count / maxStatusCount) * 100
-                          }%`,
-                          backgroundColor:
-                            status.color || "#64748B",
+                          width: `${(status.count / maxStatusCount) * 100}%`,
+                          backgroundColor: status.color || "#64748B",
                         }}
                       />
                     </div>
@@ -764,9 +810,7 @@ export default function ProjectOverviewPage() {
                       <div
                         className="h-full rounded-full bg-primary transition-all"
                         style={{
-                          width: `${
-                            (item.count / maxPriorityCount) * 100
-                          }%`,
+                          width: `${(item.count / maxPriorityCount) * 100}%`,
                         }}
                       />
                     </div>
@@ -791,30 +835,22 @@ export default function ProjectOverviewPage() {
           <CardContent>
             <div className="grid grid-cols-3 gap-4">
               <div className="rounded-lg border p-4 text-center">
-                <p className="text-2xl font-bold">
-                  {statistics.activeSprints}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Active
-                </p>
+                <p className="text-2xl font-bold">{statistics.activeSprints}</p>
+                <p className="mt-1 text-xs text-muted-foreground">Active</p>
               </div>
 
               <div className="rounded-lg border p-4 text-center">
                 <p className="text-2xl font-bold">
                   {statistics.plannedSprints}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Planned
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Planned</p>
               </div>
 
               <div className="rounded-lg border p-4 text-center">
                 <p className="text-2xl font-bold">
                   {statistics.completedSprints}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Completed
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Completed</p>
               </div>
             </div>
 
@@ -826,18 +862,14 @@ export default function ProjectOverviewPage() {
                     className="flex items-center justify-between rounded-lg border p-3"
                   >
                     <div>
-                      <p className="text-sm font-medium">
-                        {sprint.name}
-                      </p>
+                      <p className="text-sm font-medium">{sprint.name}</p>
 
                       <p className="text-xs text-muted-foreground">
                         {sprint._count?.tasks || 0} tasks
                       </p>
                     </div>
 
-                    <Badge variant="outline">
-                      {sprint.status}
-                    </Badge>
+                    <Badge variant="outline">{sprint.status}</Badge>
                   </div>
                 ))}
               </div>
@@ -886,9 +918,7 @@ export default function ProjectOverviewPage() {
                         )}
 
                         <div>
-                          <p className="text-sm font-medium">
-                            {fullName}
-                          </p>
+                          <p className="text-sm font-medium">{fullName}</p>
 
                           <p className="text-xs text-muted-foreground">
                             {member.role?.name || "Member"}
@@ -897,9 +927,7 @@ export default function ProjectOverviewPage() {
                       </div>
 
                       {member.role?.name && (
-                        <Badge variant="outline">
-                          {member.role.name}
-                        </Badge>
+                        <Badge variant="outline">{member.role.name}</Badge>
                       )}
                     </div>
                   );
@@ -933,9 +961,11 @@ export default function ProjectOverviewPage() {
             <div className="space-y-4">
               {recentActivities.map((activity) => {
                 const userName =
-                  `${activity.user?.firstName || ""} ${
-                    activity.user?.lastName || ""
-                  }`.trim() || "Someone";
+                  activity.user?.id == user.id
+                    ? "You"
+                    : `${activity.user?.firstName || ""} ${
+                        activity.user?.lastName || ""
+                      }`.trim() || "Someone";
 
                 return (
                   <div
@@ -950,7 +980,7 @@ export default function ProjectOverviewPage() {
                       />
                     ) : (
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                        {userName
+                        {(activity.user?.firstName + " " + activity.user?.lastName)
                           .split(" ")
                           .map((name) => name[0])
                           .join("")
@@ -961,16 +991,12 @@ export default function ProjectOverviewPage() {
 
                     <div className="min-w-0 flex-1">
                       <p className="text-sm">
-                        <span className="font-medium">
-                          {userName}
-                        </span>{" "}
+                        <span className="font-medium">{userName}</span>{" "}
                         {getActivityMessage(activity)}
                       </p>
 
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {new Date(
-                          activity.createdAt
-                        ).toLocaleString("en-IN", {
+                        {new Date(activity.createdAt).toLocaleString("en-IN", {
                           day: "2-digit",
                           month: "short",
                           year: "numeric",
@@ -1002,72 +1028,50 @@ export default function ProjectOverviewPage() {
         <CardContent>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <p className="text-xs text-muted-foreground">
-                Project Key
-              </p>
-              <p className="mt-1 font-medium">
-                {overview.project.key}
-              </p>
+              <p className="text-xs text-muted-foreground">Project Key</p>
+              <p className="mt-1 font-medium">{overview.project.key}</p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground">
-                Project Type
-              </p>
+              <p className="text-xs text-muted-foreground">Project Type</p>
               <p className="mt-1 font-medium">
                 {overview.project.type || "Not set"}
               </p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground">
-                Visibility
-              </p>
+              <p className="text-xs text-muted-foreground">Visibility</p>
               <p className="mt-1 font-medium">
                 {overview.project.visibility || "Not set"}
               </p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground">
-                Team Members
-              </p>
-              <p className="mt-1 font-medium">
-                {statistics.totalMembers}
-              </p>
+              <p className="text-xs text-muted-foreground">Team Members</p>
+              <p className="mt-1 font-medium">{statistics.totalMembers}</p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground">
-                Start Date
-              </p>
+              <p className="text-xs text-muted-foreground">Start Date</p>
               <p className="mt-1 font-medium">
                 {formatDate(overview.project.startDate)}
               </p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground">
-                End Date
-              </p>
+              <p className="text-xs text-muted-foreground">End Date</p>
               <p className="mt-1 font-medium">
                 {formatDate(overview.project.endDate)}
               </p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground">
-                Total Sprints
-              </p>
-              <p className="mt-1 font-medium">
-                {statistics.totalSprints}
-              </p>
+              <p className="text-xs text-muted-foreground">Total Sprints</p>
+              <p className="mt-1 font-medium">{statistics.totalSprints}</p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground">
-                Created
-              </p>
+              <p className="text-xs text-muted-foreground">Created</p>
               <p className="mt-1 font-medium">
                 {formatDate(overview.project.createdAt)}
               </p>

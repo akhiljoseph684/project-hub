@@ -51,11 +51,6 @@ const navItems = [
     icon: ListTodo,
   },
   {
-    label: "Teams",
-    href: "/teams",
-    icon: Users,
-  },
-  {
     label: "Sprints",
     href: "/sprints",
     icon: Rocket,

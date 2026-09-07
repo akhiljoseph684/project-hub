@@ -892,11 +892,12 @@ function getActivityMessage(activity: ActivityItem) {
 
   const { user } = useAppSelector((state) => state.auth);
 
-  if(!user)return;
+  if (!user) return "";
 
-  const actor = activity.user?.id && activity.user?.id !== user.id
-    ? `${activity.user.firstName} ${activity.user.lastName || ""}`.trim()
-    : "You";
+  const actor =
+    activity.user?.id && activity.user.id !== user.id
+      ? `${activity.user.firstName} ${activity.user.lastName || ""}`.trim()
+      : "You";
 
   switch (activity.type) {
     case "PROJECT_CREATED":
@@ -951,6 +952,23 @@ function getActivityMessage(activity: ActivityItem) {
     case "SPRINT_COMPLETED":
       return `${actor} completed sprint ${metadata.sprintName || ""}`;
 
+    case "TASK_CHECKLIST_CREATED":
+      return `${actor} added checklist item "${
+        metadata.title || "a checklist item"
+      }" to ${metadata.taskTitle || metadata.taskKey || "a task"}`;
+
+    case "TASK_CHECKLIST_UPDATED":
+      return `${actor} ${
+        metadata.isCompleted ? "completed" : "uncompleted"
+      } checklist item "${metadata.title || "a checklist item"}" in ${
+        metadata.taskTitle || metadata.taskKey || "a task"
+      }`;
+
+    case "TASK_CHECKLIST_DELETED":
+      return `${actor} deleted checklist item "${
+        metadata.title || "a checklist item"
+      }" from ${metadata.taskTitle || metadata.taskKey || "a task"}`;
+
     case "MEMBER_ADDED":
       return `${actor} added ${
         metadata.memberName || "a member"
@@ -969,10 +987,14 @@ function getActivityMessage(activity: ActivityItem) {
       }`;
 
     case "FILE_UPLOADED":
-      return `${actor} uploaded a file`;
+      return `${actor} uploaded "${metadata.fileName || "a file"}"${
+        metadata.taskKey ? ` to ${metadata.taskKey}` : ""
+      }`;
 
     case "FILE_DELETED":
-      return `${actor} deleted a file`;
+      return `${actor} deleted "${metadata.fileName || "a file"}"${
+        metadata.taskKey ? ` from ${metadata.taskKey}` : ""
+      }`;
 
     default:
       return `${actor} performed ${activity.type

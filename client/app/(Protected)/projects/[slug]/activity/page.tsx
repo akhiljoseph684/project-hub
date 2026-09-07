@@ -7,10 +7,13 @@ import {
   CheckCircle2,
   CircleDot,
   FileText,
+  ListChecks,
   ListTodo,
   Loader2,
+  Pencil,
   PlayCircle,
   Plus,
+  Trash2,
   UserCog,
   UserMinus,
   UserPlus,
@@ -84,11 +87,24 @@ export default function ProjectActivityPage() {
 
   const getActivityIcon = (type: string) => {
     switch (type) {
+
       case "PROJECT_CREATED":
         return <Plus className="h-4 w-4" />;
 
+      case "PROJECT_UPDATED":
+        return <Pencil className="h-4 w-4" />;
+
       case "TASK_CREATED":
         return <Plus className="h-4 w-4" />;
+
+      case "TASK_UPDATED":
+        return <Pencil className="h-4 w-4" />;
+
+      case "TASK_COMPLETED":
+        return <CheckCircle2 className="h-4 w-4" />;
+
+      case "TASK_ASSIGNED":
+        return <UserPlus className="h-4 w-4" />;
 
       case "TASK_STATUS_CHANGED":
         return <ListTodo className="h-4 w-4" />;
@@ -108,8 +124,20 @@ export default function ProjectActivityPage() {
       case "SPRINT_COMPLETED":
         return <CheckCircle2 className="h-4 w-4" />;
 
+      case "TASK_CHECKLIST_CREATED":
+        return <ListChecks className="h-4 w-4" />;
+
+      case "TASK_CHECKLIST_UPDATED":
+        return <CheckCircle2 className="h-4 w-4" />;
+
+      case "TASK_CHECKLIST_DELETED":
+        return <Trash2 className="h-4 w-4" />;
+
       case "FILE_UPLOADED":
         return <FileText className="h-4 w-4" />;
+
+      case "FILE_DELETED":
+        return <Trash2 className="h-4 w-4" />;
 
       case "MEMBER_ADDED":
         return <UserPlus className="h-4 w-4" />;

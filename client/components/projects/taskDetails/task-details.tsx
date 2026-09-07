@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
 import type { TaskDetailsData } from "./task-details-dialog";
+import { useAppSelector } from "@/redux/hooks";
 
 interface TaskDetailsProps {
   task: TaskDetailsData;
@@ -32,6 +33,10 @@ const priorityConfig = {
 
 export default function TaskDetails({ task }: TaskDetailsProps) {
   const priority = priorityConfig[task.priority];
+
+  const { user } = useAppSelector((state) => state.auth);
+
+  if(!user)return
 
   return (
     <section className="space-y-6">
@@ -93,7 +98,7 @@ export default function TaskDetails({ task }: TaskDetailsProps) {
               <p className="text-xs text-muted-foreground">Assignee</p>
 
               <p className="truncate text-sm font-medium">
-                {task.assignee?.name || "Unassigned"}
+                {task.assignee?.id === user.id ? "You" : task.assignee?.name || "Unassigned"}
               </p>
             </div>
           </div>

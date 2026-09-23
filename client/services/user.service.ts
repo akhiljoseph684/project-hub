@@ -44,3 +44,14 @@ export const getUserDashboard = async () => {
     throw error;
   }
 };
+
+export const getUserAnalytics = async () => {
+  try {
+    const response = await api.get("/user/analytics");
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch user analytics:", error);
+    throw error;
+  }
+};

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Check, Crown, Loader2 } from "lucide-react";
 
 import {
@@ -27,6 +27,8 @@ interface Plan {
 
 export default function PlanCheckoutPage() {
   const params = useParams();
+
+  const router = useRouter()
 
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,6 +109,7 @@ export default function PlanCheckoutPage() {
       const razorpay = new window.Razorpay(options);
 
       razorpay.open();
+      router.push("/billing")
     } catch (error: any) {
       showErrorToast(error.message)
     }

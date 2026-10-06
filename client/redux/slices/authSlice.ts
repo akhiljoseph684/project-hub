@@ -1,18 +1,18 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  avatar: string | null;
-  role: string;
-  email: string;
-  isVerified: boolean;
+  id: string | undefined;
+  firstName: string | undefined;
+  lastName: string | undefined;
+  avatar: string | null | undefined;
+  role: string | undefined;
+  email: string | undefined;
+  isVerified: boolean | undefined;
   plan: {
     slug: string;
     name: string;
   } | null;
-  planId: string;
+  planId: string | undefined;
 }
 
 interface AuthState {
@@ -51,7 +51,18 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
     },
     updateUser: (state, action: PayloadAction<User>) => {
-      state.user = action.payload;
+      const user: User = {
+        id:  action.payload.id || state?.user?.id,
+        firstName: action.payload.firstName || state?.user?.firstName,
+        lastName: action.payload.lastName || state?.user?.lastName,
+        avatar: action.payload.avatar || state?.user?.avatar,
+        role: action.payload.role || state?.user?.role,
+        email: action.payload.email || state?.user?.email,
+        isVerified: action.payload.isVerified || state?.user?.isVerified,
+        plan: action.payload.plan || null,
+        planId: "",
+      }
+      state.user = user;
     },
     setLoading: (state, action) => {
       state.loading = action.payload;

@@ -22,6 +22,7 @@ import ProjectMembers from "./project-members";
 import ProjectSummary from "./project-summary";
 import { createProject } from "@/services/project.service";
 import { useRouter } from "next/navigation";
+import { showErrorToast } from "@/lib/toast";
 
 export default function CreateProjectForm() {
   const [loading, setLoading] = useState(false);
@@ -90,8 +91,8 @@ export default function CreateProjectForm() {
       await createProject(formData);
 
       router.push("/projects");
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      showErrorToast(error.message)
     } finally {
       setLoading(false);
     }

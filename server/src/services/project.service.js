@@ -1,6 +1,7 @@
 import slugify from "slugify";
 import prisma from "../../config/prisma.js";
 import { createProjectActivity } from "./project-activity.service.js";
+import { checkMemberLimit, checkProjectLimit } from "./plan-limit.service.js";
 
 export const searchUsersService = async (search) => {
   const users = await prisma.user.findMany({
@@ -56,6 +57,8 @@ export const createProject = async ({ ownerId, body, file }) => {
     endDate,
   } = body;
 
+  await checkProjectLimit(ownerId);
+
   const features = body.features
     ? Array.isArray(body.features)
       ? body.features
@@ -93,6 +96,21 @@ export const createProject = async ({ ownerId, body, file }) => {
   if (file) {
     const result = await uploadToCloudinary(file.path);
     icon = result.secure_url;
+  }
+
+  const parsedStartDate = startDate ? new Date(startDate) : null;
+  const parsedEndDate = endDate ? new Date(endDate) : null;
+
+  if (startDate && isNaN(parsedStartDate.getTime())) {
+    throw new Error("Invalid start date.");
+  }
+
+  if (endDate && isNaN(parsedEndDate.getTime())) {
+    throw new Error("Invalid end date.");
+  }
+
+  if (parsedStartDate && parsedEndDate && parsedEndDate < parsedStartDate) {
+    throw new Error("End date cannot be before start date.");
   }
 
   return await prisma.$transaction(async (tx) => {
@@ -192,7 +210,7 @@ export const createProject = async ({ ownerId, body, file }) => {
         roleId: ownerRole.id,
       },
     });
-    
+
     await tx.projectActivity.create({
       data: {
         projectId: project.id,
@@ -725,6 +743,9 @@ export const createProjectInvitation = async ({
   userId,
   roleId,
 }) => {
+
+  await checkMemberLimit(userId);
+
   const project = await prisma.project.findUnique({
     where: {
       id: projectId,

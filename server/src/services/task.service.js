@@ -1,4 +1,5 @@
 import prisma from "../../config/prisma.js";
+import { checkTaskLimit } from "./plan-limit.service.js";
 import { createProjectActivity } from "./project-activity.service.js";
 
 export const createTask = async ({ projectId, userId, body }) => {
@@ -12,6 +13,8 @@ export const createTask = async ({ projectId, userId, body }) => {
     dueDate,
     labels = [],
   } = body;
+
+  await checkTaskLimit(userId);
 
   if (!title?.trim()) {
     throw new Error("Task title is required.");

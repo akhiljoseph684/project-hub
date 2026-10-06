@@ -18,7 +18,7 @@ import TaskLabels from "./task-labels";
 import TaskDueDate from "./task-due-date";
 
 import { createTaskSchema, CreateTaskInput } from "@/lib/validations/task";
-import { showSuccessToast } from "@/lib/toast";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { createTask } from "@/services/task.service";
 
 interface ProjectStatus {
@@ -95,8 +95,8 @@ export default function TaskForm({
       showSuccessToast(res.message);
 
       onSuccess?.();
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      showErrorToast(error.message);
     } finally {
       setLoading(false);
     }

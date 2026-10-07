@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -10,7 +10,7 @@ import { useDispatch } from "react-redux";
 import { logout, setAuth } from "@/redux/slices/authSlice";
 import { showErrorToast, showInfoToast } from "@/lib/toast";
 
-export default function VerifyOtpPage() {
+function VerifyOtpContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -278,5 +278,13 @@ export default function VerifyOtpPage() {
         </div>
       </main>
     </VerifyOtpRoute>
+  );
+}
+
+export default function VerifyOtpPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyOtpContent />
+    </Suspense>
   );
 }

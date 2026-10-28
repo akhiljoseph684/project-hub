@@ -127,7 +127,9 @@ export default function BillingPage() {
         </h2>
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {plans.map((plan) => (
+          {plans.map((plan) => ((user?.plan?.slug === "free") || (user?.plan?.slug === "pro" && plan.slug !== "free") || (user?.plan?.slug === "pro" && plan.slug !== "free") || (user?.plan?.slug === "business" &&
+                plan.slug !== "free" &&
+                plan.slug !== "pro")) && (
             <Card
               key={plan.id}
               className={`relative transition-all duration-300 hover:shadow-lg ${

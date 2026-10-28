@@ -279,7 +279,7 @@ export default function RegisterPage() {
               <div className="h-px flex-1 bg-gray-200 dark:bg-zinc-700" />
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <button
                 type="button"
                 className="
@@ -329,7 +329,7 @@ export default function RegisterPage() {
               >
                 Continue with GitHub
               </button>
-            </div>
+            </div> */}
 
             <p className="mt-5 text-center text-sm text-gray-500 dark:text-gray-400">
               Already have an account?{" "}
